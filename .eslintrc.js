@@ -78,13 +78,6 @@ module.exports = {
         schemaJson: require('./introspection.json'),
       },
     ],
-    'graphql/require-fields': [
-      'error',
-      {
-        env: 'apollo',
-        schemaJson: require('./introspection.json'),
-      },
-    ],
   },
   settings: {
     'import/parsers': {
