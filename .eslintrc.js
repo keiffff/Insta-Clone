@@ -24,6 +24,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'prettier', 'react', 'react-hooks', 'graphql'],
   rules: {
     // eslint
+    'global-require': 'off',
     'consistent-return': 'off',
     'newline-before-return': 'error',
     'no-console': 'warn',

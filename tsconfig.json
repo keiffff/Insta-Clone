@@ -13,6 +13,8 @@
     "moduleResolution": "node",
     "baseUrl": "src",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
   "compileOnSave": true,

@@ -1,6 +1,5 @@
 const path = require('path');
 const argv = require('yargs').argv;
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
   context: process.cwd(),
@@ -22,11 +21,14 @@ module.exports = {
       {
         test: /\.ts(x?)$/,
         exclude: /node_modules/,
-        use: [{ loader: 'ts-loader', options: { transpileOnly: true } }],
+        use: [{ loader: 'ts-loader' }],
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: ['file-loader'],
       },
     ],
   },
-  plugins: [new ForkTsCheckerWebpackPlugin()],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
