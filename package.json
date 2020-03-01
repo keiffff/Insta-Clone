@@ -1,0 +1,71 @@
+{
+  "name": "frontend-project-boilerplate",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "author": "Kei Fujikawa",
+  "license": "MIT",
+  "scripts": {
+    "remake": "rm -rf dist/; mkdir -p dist/; cp src/index.html dist/index.html;",
+    "start": "yarn remake; webpack-dev-server --progress --develop",
+    "build": "yarn remake; webpack --progress",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "codegen": "yarn graphql-codegen"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^1.12.2",
+    "@graphql-codegen/introspection": "^1.12.2",
+    "@graphql-codegen/typescript": "^1.12.2",
+    "@graphql-codegen/typescript-operations": "^1.12.2",
+    "@graphql-codegen/typescript-react-apollo": "^1.12.2",
+    "@types/graphql": "^14.5.0",
+    "@types/node": "^13.7.7",
+    "@types/react": "^16.9.22",
+    "@types/react-dom": "^16.9.5",
+    "@types/ws": "^7.2.2",
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^2.20.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-typescript": "^7.0.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-react-hooks": "^2.4.0",
+    "fork-ts-checker-webpack-plugin": "^4.0.4",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.8.2",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "@apollo/react-common": "^3.1.3",
+    "@apollo/react-hooks": "^3.1.3",
+    "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
+    "apollo-link": "^1.2.13",
+    "apollo-link-http": "^1.5.16",
+    "apollo-link-ws": "^1.0.19",
+    "apollo-utilities": "^1.3.3",
+    "graphql": "^14.6.0",
+    "graphql-tag": "^2.10.3",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "subscriptions-transport-ws": "^0.9.16"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint 'src/**/*.{ts,tsx}' --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
+}

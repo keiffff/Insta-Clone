@@ -1,0 +1,20 @@
+schema: https://insta-clone-sample.herokuapp.com/v1/graphql
+documents:
+  - ./src/**/*.ts
+overwrite: true
+generates:
+  ./src/types/graphql.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      skipTypename: false
+      withHooks: true
+      withHOC: false
+      withComponent: false
+  introspection.json:
+    plugins:
+      - introspection
+    config:
+      minify: true
