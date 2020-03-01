@@ -21,7 +21,7 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'prettier', 'react', 'react-hooks'],
+  plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'prettier', 'react', 'react-hooks', 'graphql'],
   rules: {
     // eslint
     'consistent-return': 'off',
@@ -70,6 +70,21 @@ module.exports = {
     // react-hooks
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    // graphql
+    'graphql/template-strings': [
+      'error',
+      {
+        env: 'apollo',
+        schemaJson: require('./introspection.json'),
+      },
+    ],
+    'graphql/require-fields': [
+      'error',
+      {
+        env: 'apollo',
+        schemaJson: require('./introspection.json'),
+      },
+    ],
   },
   settings: {
     'import/parsers': {
