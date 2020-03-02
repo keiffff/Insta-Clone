@@ -68,6 +68,7 @@ module.exports = {
     'react/jsx-one-expression-per-line': 'warn',
     'react/jsx-wrap-multilines': 'off',
     'react/no-array-index-key': 'off',
+    'react/display-name': 'off',
     // react-hooks
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',

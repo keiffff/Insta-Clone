@@ -1,8 +1,9 @@
-import * as React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
 import { AddBoxOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
+import { Uploader } from '../components/Uploader';
 import { useNotifyNewPostsSubscription } from '../types/graphql';
 import logo from '../assets/images/logo.png';
 
@@ -56,6 +57,8 @@ const AddButtonWrapper = styled.div`
 
 export const PostsIndex = () => {
   const { loading, data } = useNotifyNewPostsSubscription();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const handleClickAddButton = useCallback(() => fileInputRef.current?.click(), []);
 
   return (
     <Page>
@@ -77,9 +80,11 @@ export const PostsIndex = () => {
       )}
       <Footer>
         <AddButtonWrapper>
-          <IconButton size="small">
-            <AddBoxOutlined />
-          </IconButton>
+          <Uploader ref={fileInputRef}>
+            <IconButton size="small" onClick={handleClickAddButton}>
+              <AddBoxOutlined />
+            </IconButton>
+          </Uploader>
         </AddButtonWrapper>
       </Footer>
     </Page>
