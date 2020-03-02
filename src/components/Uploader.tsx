@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 type Props = {
   children: ReactNode;
-  onUpload?: (file: File) => void;
+  onUpload: (file: File) => void;
 };
 
 const FileInput = styled.input`
@@ -14,7 +14,7 @@ export const Uploader = forwardRef(({ children, onUpload }: Props, ref: Ref<HTML
   const handleUpload = useCallback<ChangeEventHandler<HTMLInputElement>>(
     e => {
       const { files } = e.target;
-      if (!files?.length || !onUpload) return;
+      if (!files?.length) return;
       onUpload(files[0]);
     },
     [onUpload],

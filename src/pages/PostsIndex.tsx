@@ -4,7 +4,7 @@ import { AddBoxOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
-import { useNotifyNewPostsSubscription } from '../types/graphql';
+import { useNotifyNewPostsSubscription, useUploadFileMutation } from '../types/graphql';
 import logo from '../assets/images/logo.png';
 
 const Page = styled.div`
@@ -56,31 +56,33 @@ const AddButtonWrapper = styled.div`
 `;
 
 export const PostsIndex = () => {
-  const { loading, data } = useNotifyNewPostsSubscription();
+  const { loading: notifyNewPostsLoading, data: notifyNewPostsData } = useNotifyNewPostsSubscription();
+  const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleClickAddButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleUploadFile = useCallback((file: File) => uploadFile({ variables: { file } }), [uploadFile]);
 
   return (
     <Page>
       <Header>
         <Logo src={logo} alt="logo" />
       </Header>
-      {loading ? (
+      {notifyNewPostsLoading || uploadFileLoading ? (
         <CircularProgressWrapper>
           <CircularProgress size={30} />
         </CircularProgressWrapper>
       ) : (
         <List>
-          {data?.Post.map(({ uuid, caption, image, User }) => (
+          {notifyNewPostsData?.Post.map(({ uuid, caption, image, User }) => (
             <li key={uuid}>
-              <PostItem image={image} caption={caption} user={User} />
+              <PostItem image={uploadFileData?.uploadFile ?? image} caption={caption} user={User} />
             </li>
           )) || null}
         </List>
       )}
       <Footer>
         <AddButtonWrapper>
-          <Uploader ref={fileInputRef}>
+          <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
             <IconButton size="small" onClick={handleClickAddButton}>
               <AddBoxOutlined />
             </IconButton>

@@ -1,7 +1,6 @@
 schema: https://insta-clone-sample.herokuapp.com/v1/graphql
 documents:
   - ./src/**/*.ts
-overwrite: true
 generates:
   ./src/types/graphql.ts:
     plugins:
