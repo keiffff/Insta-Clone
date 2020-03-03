@@ -1,11 +1,12 @@
-import React from 'react';
-import { CircularProgress, IconButton } from '@material-ui/core';
+import React, { useCallback, useState, ChangeEventHandler } from 'react';
+import { CircularProgress, Button, IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
 
 type Props = {
   imageUrl?: string;
   loading: boolean;
+  onSubmit: (imageUrl: string, caption: string) => void;
   onClose: () => void;
 };
 
@@ -26,7 +27,7 @@ const Screen = styled.div`
   background: #fafafa;
 `;
 
-const NewPostScreenHeader = styled.header`
+const Header = styled.header`
   background: #ffffff;
   border-bottom: 1px solid #dbdbdb;
   position: fixed;
@@ -38,15 +39,21 @@ const NewPostScreenHeader = styled.header`
   padding: 7px;
 `;
 
-const NewPostScreenHeaderTitle = styled.h1`
+const Title = styled.h1`
   font-size: 14px;
   margin: 0 auto;
   line-height: 1.4;
 `;
 
+const SubmitButton = styled(Button)`
+  .MuiButton-label {
+    color: #3797f7;
+  }
+`;
+
 const CONTAINER_HEIGHT = 144;
 
-const NewPostContainer = styled.div`
+const Container = styled.div`
   width: 100%;
   height: ${CONTAINER_HEIGHT}px;
   display: flex;
@@ -61,7 +68,7 @@ const UploadedImage = styled.img`
   height: ${CONTAINER_HEIGHT}px;
 `;
 
-const NewPostCaption = styled.textarea`
+const Caption = styled.textarea`
   width: calc(100% - ${CONTAINER_HEIGHT}px);
   height: ${CONTAINER_HEIGHT}px;
   padding: 0;
@@ -71,23 +78,38 @@ const NewPostCaption = styled.textarea`
   resize: none;
 `;
 
-export const NewPostScreen = ({ imageUrl, loading, onClose }: Props) => (
-  <Screen>
-    <NewPostScreenHeader>
-      <IconButton size="small" onClick={onClose}>
-        <Close />
-      </IconButton>
-      <NewPostScreenHeaderTitle>新しい写真投稿</NewPostScreenHeaderTitle>
-    </NewPostScreenHeader>
-    {loading ? (
-      <CircularProgressWrapper>
-        <CircularProgress size={30} />
-      </CircularProgressWrapper>
-    ) : imageUrl ? (
-      <NewPostContainer>
-        <UploadedImage src={imageUrl} alt="uploaded-image" />
-        <NewPostCaption placeholder="キャプションを書く" />
-      </NewPostContainer>
-    ) : null}
-  </Screen>
-);
+export const NewPostScreen = ({ imageUrl, loading, onSubmit, onClose }: Props) => {
+  const [caption, setCaption] = useState('');
+  const handleChangeCaption = useCallback<ChangeEventHandler<HTMLTextAreaElement>>(
+    e => setCaption(e.currentTarget.value),
+    [],
+  );
+  const handleClickSubmit = useCallback(() => {
+    if (!imageUrl || !caption) return;
+    onSubmit(imageUrl, caption);
+  }, [imageUrl, caption, onSubmit]);
+
+  return (
+    <Screen>
+      <Header>
+        <IconButton size="small" onClick={onClose}>
+          <Close />
+        </IconButton>
+        <Title>新しい写真投稿</Title>
+        <SubmitButton size="small" onClick={handleClickSubmit}>
+          シェア
+        </SubmitButton>
+      </Header>
+      {loading ? (
+        <CircularProgressWrapper>
+          <CircularProgress size={30} />
+        </CircularProgressWrapper>
+      ) : imageUrl ? (
+        <Container>
+          <UploadedImage src={imageUrl} alt="uploaded-image" />
+          <Caption placeholder="キャプションを書く" onChange={handleChangeCaption} />
+        </Container>
+      ) : null}
+    </Screen>
+  );
+};

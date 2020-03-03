@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
-import { useGetNewPostsQuery, useUploadFileMutation } from '../types/graphql';
+import { useGetNewPostsQuery, useUploadFileMutation, useInsertPostMutation } from '../types/graphql';
 
 const Page = styled.div`
   padding-top: 45px;
@@ -59,6 +59,7 @@ const AddButtonWrapper = styled.div`
 export const PostsIndex = () => {
   const { loading: notifyNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
+  const [insertPost] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const handleClickAddButton = useCallback(() => fileInputRef.current?.click(), []);
@@ -70,6 +71,14 @@ export const PostsIndex = () => {
     [uploadFile],
   );
   const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
+  const handleSubmitNewPost = useCallback(
+    (imageUrl: string, caption: string) => {
+      // userUuidは一旦仮で入れている
+      insertPost({ variables: { image: imageUrl, caption, userUuid: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' } });
+      setNewPostScreenVisible(false);
+    },
+    [insertPost],
+  );
 
   return (
     <>
@@ -104,6 +113,7 @@ export const PostsIndex = () => {
         <NewPostScreen
           imageUrl={uploadFileData?.uploadFile || ''}
           loading={uploadFileLoading}
+          onSubmit={handleSubmitNewPost}
           onClose={handleCloseNewPostScreen}
         />
       ) : null}
