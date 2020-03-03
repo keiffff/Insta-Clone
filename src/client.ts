@@ -7,7 +7,7 @@ import { getMainDefinition } from 'apollo-utilities';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
 const httpUri = 'https://insta-clone-sample.herokuapp.com/v1/graphql';
-const wsUri = httpUri.replace(/^https?/, 'ws');
+const wsUri = httpUri.replace(/^https?/, 'wss');
 const uploadUri = 'https://image-processor.now.sh';
 
 const httpLink = new HttpLink({ uri: httpUri });

@@ -9,7 +9,8 @@
     "start": "yarn remake; webpack-dev-server --progress --develop",
     "build": "yarn remake; webpack --progress",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
-    "codegen": "graphql-codegen -c codegen.hasura.yml && graphql-codegen -c codegen.yml"
+    "codegen": "graphql-codegen -c codegen.hasura.yml && graphql-codegen -c codegen.yml",
+    "deploy": "now --prod"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.12.2",
@@ -38,6 +39,7 @@
     "fork-ts-checker-webpack-plugin": "^4.0.4",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.7",
+    "now": "^17.0.4",
     "prettier": "^1.19.1",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.2",
