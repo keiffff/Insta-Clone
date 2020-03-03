@@ -9,7 +9,7 @@
     "start": "yarn remake; webpack-dev-server --progress --develop",
     "build": "yarn remake; webpack --progress",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
-    "codegen": "graphql-codegen -c codegen.hasura.yml && graphql-codegen -c codegen.yml",
+    "codegen": "graphql-codegen -c codegen.yml",
     "deploy": "now --prod"
   },
   "devDependencies": {

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
-import { useNotifyNewPostsSubscription, useUploadFileMutation } from '../types/graphql';
+import { useGetNewPostsQuery, useUploadFileMutation } from '../types/graphql';
 
 const Page = styled.div`
   padding-top: 45px;
@@ -57,7 +57,7 @@ const AddButtonWrapper = styled.div`
 `;
 
 export const PostsIndex = () => {
-  const { loading: notifyNewPostsLoading, data: notifyNewPostsData } = useNotifyNewPostsSubscription();
+  const { loading: notifyNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
@@ -83,7 +83,7 @@ export const PostsIndex = () => {
           </CircularProgressWrapper>
         ) : (
           <List>
-            {notifyNewPostsData?.Post.map(({ uuid, caption, image, User }) => (
+            {getNewPostsData?.Post.map(({ uuid, caption, image, User }) => (
               <li key={uuid}>
                 <PostItem image={image} caption={caption} user={User} />
               </li>
