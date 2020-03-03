@@ -19,6 +19,21 @@ const uploadLink = createUploadLink({
   },
 });
 
+const uploadOrHttpLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+
+    return (
+      (definition.kind === 'OperationDefinition' &&
+        definition.operation === 'mutation' &&
+        definition.name?.value === 'uploadFile') ||
+      false
+    );
+  },
+  uploadLink,
+  httpLink,
+);
+
 // subscriptionを発行する際にはWebSocketで接続、それ以外はHTTPで接続するための設定
 const link = split(
   ({ query }) => {
@@ -27,10 +42,9 @@ const link = split(
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
   wsLink,
-  httpLink,
+  uploadOrHttpLink,
 );
 
 const inMemoryCache = new InMemoryCache();
 
 export const client = new ApolloClient({ link, cache: inMemoryCache });
-export const uploadClient = new ApolloClient({ link: uploadLink, cache: new InMemoryCache() });
