@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { useNotifyNewPostsSubscription, useUploadFileMutation } from '../types/graphql';
-import logo from '../assets/images/logo.png';
 
 const Page = styled.div`
   padding-top: 45px;
@@ -65,7 +64,7 @@ export const PostsIndex = () => {
   return (
     <Page>
       <Header>
-        <Logo src={logo} alt="logo" />
+        <Logo src="./assets/images/logo.png" alt="logo" />
       </Header>
       {notifyNewPostsLoading || uploadFileLoading ? (
         <CircularProgressWrapper>
