@@ -1,9 +1,10 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
-import { AddBoxOutlined, Close } from '@material-ui/icons';
+import { AddBoxOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
+import { NewPostScreen } from '../components/NewPostScreen';
 import { useNotifyNewPostsSubscription, useUploadFileMutation } from '../types/graphql';
 
 const Page = styled.div`
@@ -55,53 +56,6 @@ const AddButtonWrapper = styled.div`
   margin: auto;
 `;
 
-const NewPostScreen = styled(Page)`
-  width: 100%;
-  height: 100%;
-  z-index: 1200;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #fafafa;
-`;
-
-const NewPostScreenHeader = styled(Header)`
-  padding: 7px;
-`;
-
-const NewPostScreenHeaderTitle = styled.h1`
-  font-size: 14px;
-  margin: 0 auto;
-  line-height: 1.4;
-`;
-
-const CONTAINER_HEIGHT = 144;
-
-const NewPostContainer = styled.div`
-  width: 100%;
-  height: ${CONTAINER_HEIGHT}px;
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  margin-left: 8px;
-  background: #ffffff;
-  border-bottom: 1px solid #dbdbdb;
-`;
-
-const UploadedImage = styled.img`
-  width: ${CONTAINER_HEIGHT}px;
-  height: ${CONTAINER_HEIGHT}px;
-`;
-
-const NewPostCaption = styled.textarea`
-  width: calc(100% - ${CONTAINER_HEIGHT}px);
-  height: ${CONTAINER_HEIGHT}px;
-  padding: 0;
-  outline: none;
-  font-size: 14px;
-  resize: none;
-`;
-
 export const PostsIndex = () => {
   const { loading: notifyNewPostsLoading, data: notifyNewPostsData } = useNotifyNewPostsSubscription();
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
@@ -147,24 +101,11 @@ export const PostsIndex = () => {
         </Footer>
       </Page>
       {newPostScreenVisible ? (
-        <NewPostScreen>
-          <NewPostScreenHeader>
-            <IconButton size="small" onClick={handleCloseNewPostScreen}>
-              <Close />
-            </IconButton>
-            <NewPostScreenHeaderTitle>新しい写真投稿</NewPostScreenHeaderTitle>
-          </NewPostScreenHeader>
-          {uploadFileLoading ? (
-            <CircularProgressWrapper>
-              <CircularProgress size={30} />
-            </CircularProgressWrapper>
-          ) : uploadFileData?.uploadFile ? (
-            <NewPostContainer>
-              <UploadedImage src={uploadFileData.uploadFile} alt="uploaded-image" />
-              <NewPostCaption placeholder="キャプションを書く" />
-            </NewPostContainer>
-          ) : null}
-        </NewPostScreen>
+        <NewPostScreen
+          imageUrl={uploadFileData?.uploadFile || ''}
+          loading={uploadFileLoading}
+          onClose={handleCloseNewPostScreen}
+        />
       ) : null}
     </>
   );
