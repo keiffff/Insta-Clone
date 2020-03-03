@@ -1,0 +1,9 @@
+schema: https://insta-clone-sample.herokuapp.com/v1/graphql
+documents:
+overwrite: true
+generates:
+  ./introspection.json:
+    plugins:
+      - introspection
+    config:
+      minify: true

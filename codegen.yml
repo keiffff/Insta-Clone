@@ -1,8 +1,10 @@
-schema: https://insta-clone-sample.herokuapp.com/v1/graphql
-documents:
-  - ./src/**/*.ts
+schema:
+  - ./introspection.json
+  - https://image-processor.now.sh
+overwrite: true
 generates:
   ./src/types/graphql.ts:
+    documents: ./src/**/*.ts
     plugins:
       - typescript
       - typescript-operations
@@ -12,7 +14,7 @@ generates:
       withHooks: true
       withHOC: false
       withComponent: false
-  introspection.json:
+  ./introspection.json:
     plugins:
       - introspection
     config:
