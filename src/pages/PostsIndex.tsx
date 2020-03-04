@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
-import { useGetNewPostsQuery, useInsertPostMutation } from '../types/hasura';
+import { GetNewPostsDocument, GetNewPostsQuery, useGetNewPostsQuery, useInsertPostMutation } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 
 const Page = styled.div`
@@ -77,6 +77,15 @@ export const PostsIndex = () => {
       // userUuidは一旦仮で入れている
       insertPost({
         variables: { image: imageUrl, caption, userUuid: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' },
+        update(cache, { data }) {
+          const posts = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
+          cache.writeQuery({
+            query: GetNewPostsDocument,
+            data: {
+              Post: [...(data?.insert_Post?.returning ?? []), ...(posts?.Post ?? [])],
+            },
+          });
+        },
       });
       setNewPostScreenVisible(false);
     },
