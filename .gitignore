@@ -21,6 +21,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # auto-generated
-src/types/graphql.ts
+src/types
 introspection.json
 .now

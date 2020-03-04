@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
-import { useGetNewPostsQuery, useUploadFileMutation, useInsertPostMutation } from '../types/graphql';
+import { useGetNewPostsQuery, useInsertPostMutation } from '../types/hasura';
+import { useUploadFileMutation } from '../types/fileUpload';
 
 const Page = styled.div`
   padding: 45px 0px 80px;

@@ -73,14 +73,6 @@ module.exports = {
     // react-hooks
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
-    // graphql
-    'graphql/template-strings': [
-      'error',
-      {
-        env: 'apollo',
-        schemaJson: require('./introspection.json'),
-      },
-    ],
   },
   settings: {
     'import/parsers': {

@@ -1,8 +1,8 @@
 schema: https://insta-clone-sample.herokuapp.com/v1/graphql
-documents: ./src/**/*.ts
+documents: './src/graphql/hasura/**/*.ts'
 overwrite: true
 generates:
-  ./src/types/graphql.ts:
+  ./src/types/hasura.ts:
     plugins:
       - typescript
       - typescript-operations
@@ -12,8 +12,3 @@ generates:
       withHooks: true
       withHOC: false
       withComponent: false
-  introspection.json:
-    plugins:
-      - introspection
-    config:
-      minify: true
