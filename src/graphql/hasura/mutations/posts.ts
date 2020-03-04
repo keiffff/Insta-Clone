@@ -1,14 +1,13 @@
 import gql from 'graphql-tag';
 
 export const INSERT_POST = gql`
-  mutation insertPost($image: String!, $caption: String!, $userUuid: uuid!) {
-    insert_Post(objects: { image: $image, caption: $caption, user_uuid: $userUuid }) {
-      affected_rows
+  mutation insertPost($image: String!, $caption: String!, $userId: String!) {
+    insert_posts(objects: { image: $image, caption: $caption, user_id: $userId }) {
       returning {
-        uuid
+        id
         image
         caption
-        User {
+        user {
           avatar
           name
         }

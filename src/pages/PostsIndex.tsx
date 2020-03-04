@@ -76,13 +76,13 @@ export const PostsIndex = () => {
     (imageUrl: string, caption: string) => {
       // userUuidは一旦仮で入れている
       insertPost({
-        variables: { image: imageUrl, caption, userUuid: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' },
+        variables: { image: imageUrl, caption, userId: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' },
         update(cache, { data }) {
-          const posts = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
+          const newPostsData = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
           cache.writeQuery({
             query: GetNewPostsDocument,
             data: {
-              Post: [...(data?.insert_Post?.returning ?? []), ...(posts?.Post ?? [])],
+              posts: [...(data?.insert_posts?.returning ?? []), ...(newPostsData?.posts ?? [])],
             },
           });
         },
@@ -104,9 +104,9 @@ export const PostsIndex = () => {
           </CircularProgressWrapper>
         ) : (
           <List>
-            {getNewPostsData?.Post.map(({ uuid, caption, image, User }) => (
-              <li key={uuid}>
-                <PostItem image={image} caption={caption} user={User} />
+            {getNewPostsData?.posts.map(({ id, caption, image, user }) => (
+              <li key={id}>
+                <PostItem image={image} caption={caption} user={user} />
               </li>
             )) || null}
           </List>
