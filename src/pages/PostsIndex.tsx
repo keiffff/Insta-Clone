@@ -8,7 +8,7 @@ import { NewPostScreen } from '../components/NewPostScreen';
 import { useGetNewPostsQuery, useUploadFileMutation, useInsertPostMutation } from '../types/graphql';
 
 const Page = styled.div`
-  padding-top: 45px;
+  padding: 45px 0px 80px;
   display: flex;
   justify-content: center;
 `;
@@ -74,7 +74,9 @@ export const PostsIndex = () => {
   const handleSubmitNewPost = useCallback(
     (imageUrl: string, caption: string) => {
       // userUuidは一旦仮で入れている
-      insertPost({ variables: { image: imageUrl, caption, userUuid: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' } });
+      insertPost({
+        variables: { image: imageUrl, caption, userUuid: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' },
+      });
       setNewPostScreenVisible(false);
     },
     [insertPost],
