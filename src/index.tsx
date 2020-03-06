@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { ApolloProvider } from '@apollo/react-hooks';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { createGlobalStyle } from 'styled-components';
-import { client } from './client';
+import { apolloClient } from './apolloClient';
 import { App } from './App';
 
 const GlobalStyle = createGlobalStyle`
@@ -29,7 +29,7 @@ ReactDOM.render(
   <>
     <GlobalStyle />
     <MuiThemeProvider theme={theme}>
-      <ApolloProvider client={client}>
+      <ApolloProvider client={apolloClient}>
         <App />
       </ApolloProvider>
     </MuiThemeProvider>

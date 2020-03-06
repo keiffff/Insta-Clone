@@ -47,4 +47,4 @@ const link = split(
 
 const inMemoryCache = new InMemoryCache();
 
-export const client = new ApolloClient({ link, cache: inMemoryCache });
+export const apolloClient = new ApolloClient({ link, cache: inMemoryCache });
