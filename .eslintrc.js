@@ -31,6 +31,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'no-restricted-syntax': 'off',
     'no-unused-expressions': ['error', { allowShortCircuit: true }],
+    'no-underscore-dangle': 'off',
     'no-nested-ternary': 'off',
     // @typescript-eslint
     '@typescript-eslint/explicit-function-return-type': 'off',

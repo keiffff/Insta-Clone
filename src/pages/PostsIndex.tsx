@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
 import { AddBoxOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
+import { useAuth0 } from '../providers/Auth0';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
@@ -58,6 +59,7 @@ const AddButtonWrapper = styled.div`
 `;
 
 export const PostsIndex = () => {
+  const { user: currentUser } = useAuth0();
   const { loading: notifyNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
   const [insertPost] = useInsertPostMutation();
@@ -74,9 +76,8 @@ export const PostsIndex = () => {
   const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
   const handleSubmitNewPost = useCallback(
     (imageUrl: string, caption: string) => {
-      // userUuidは一旦仮で入れている
       insertPost({
-        variables: { image: imageUrl, caption, userId: '35543404-7dfe-4e5a-9e57-6fe29c9704ef' },
+        variables: { image: imageUrl, caption, userId: currentUser.sub },
         update(cache, { data }) {
           const newPostsData = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
           cache.writeQuery({
@@ -89,7 +90,7 @@ export const PostsIndex = () => {
       });
       setNewPostScreenVisible(false);
     },
-    [insertPost],
+    [insertPost, currentUser],
   );
 
   return (

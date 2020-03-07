@@ -1,27 +1,29 @@
-import React, { useEffect, useState, ReactNode, useContext } from 'react';
+import React, { useContext, useState, useEffect, ReactNode } from 'react';
 import createAuth0Client from '@auth0/auth0-spa-js';
 import Auth0Client from '@auth0/auth0-spa-js/dist/typings/Auth0Client';
 import { useHistory } from 'react-router-dom';
 
 type User = {
-  nickname: string;
+  name: string;
   email: string;
   picture: string;
+  sub: string;
 };
 
 type Auth0Context = {
   authenticated: boolean;
-  user: User | null;
+  user: User;
   loading: boolean;
   getIdTokenClaims(options?: getIdTokenClaimsOptions): Promise<IdToken>;
   loginWithRedirect(options: RedirectLoginOptions): Promise<void>;
   getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string | undefined>;
+  getTokenWithPopup(options?: GetTokenWithPopupOptions): Promise<string | undefined>;
   logout(options?: LogoutOptions): void;
 };
 
-type Props = Auth0ClientOptions & { children: ReactNode };
+type Props = { children: ReactNode } & Auth0ClientOptions;
 
-export const Auth0Context = React.createContext((null as unknown) as Auth0Context);
+const Auth0Context = React.createContext((null as unknown) as Auth0Context);
 
 export function useAuth0() {
   return useContext(Auth0Context);
@@ -30,31 +32,27 @@ export function useAuth0() {
 export const Auth0Provider = ({ children, ...initOptions }: Props) => {
   const history = useHistory();
   const [authenticated, setAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [auth0Client, setAuth0Client] = useState((null as unknown) as Auth0Client);
+  const [user, setUser] = useState((null as unknown) as User);
+  const [client, setClient] = useState((null as unknown) as Auth0Client);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const initAuth0 = async () => {
       const auth0FromHook = await createAuth0Client(initOptions);
-      setAuth0Client(auth0FromHook);
-
+      setClient(auth0FromHook);
       if (window.location.search.includes('code=')) {
         const { appState } = await auth0FromHook.handleRedirectCallback();
-        history.push(appState?.targetUrl ?? window.location.pathname);
+        history.push(appState?.targetUrl || window.location.pathname);
       }
-
-      const resultIsAuthenticated = await auth0FromHook.isAuthenticated();
-
-      setAuthenticated(resultIsAuthenticated);
-
-      if (authenticated) {
-        const resultGetUser: User = await auth0FromHook.getUser();
-        setUser(resultGetUser);
+      const responseIsAuthenticated = await auth0FromHook.isAuthenticated();
+      setAuthenticated(responseIsAuthenticated);
+      if (responseIsAuthenticated) {
+        const responseGetUser = await auth0FromHook.getUser();
+        setUser(responseGetUser);
       }
-
       setLoading(false);
-    })();
+    };
+    initAuth0();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -64,10 +62,11 @@ export const Auth0Provider = ({ children, ...initOptions }: Props) => {
         authenticated,
         user,
         loading,
-        getIdTokenClaims: (options: getIdTokenClaimsOptions) => auth0Client.getIdTokenClaims(options),
-        loginWithRedirect: (options: RedirectLoginOptions) => auth0Client.loginWithRedirect(options),
-        getTokenSilently: (options?: GetTokenSilentlyOptions) => auth0Client.getTokenSilently(options),
-        logout: (options?: LogoutOptions) => auth0Client.logout(options),
+        getIdTokenClaims: (options?: getIdTokenClaimsOptions) => client.getIdTokenClaims(options),
+        loginWithRedirect: (options: RedirectLoginOptions) => client.loginWithRedirect(options),
+        getTokenSilently: (options?: GetTokenSilentlyOptions) => client.getTokenSilently(options),
+        getTokenWithPopup: (options?: GetTokenWithPopupOptions) => client.getTokenWithPopup(options),
+        logout: (options?: LogoutOptions) => client.logout(options),
       }}
     >
       {children}
