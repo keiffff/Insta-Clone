@@ -60,9 +60,9 @@ const AddButtonWrapper = styled.div`
 
 export const PostsIndex = () => {
   const { user: currentUser } = useAuth0();
-  const { loading: notifyNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
+  const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
-  const [insertPost] = useInsertPostMutation();
+  const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const handleClickAddButton = useCallback(() => fileInputRef.current?.click(), []);
@@ -79,11 +79,11 @@ export const PostsIndex = () => {
       insertPost({
         variables: { image: imageUrl, caption, userId: currentUser.sub },
         update(cache, { data }) {
-          const newPostsData = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
+          const existingPostsData = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
           cache.writeQuery({
             query: GetNewPostsDocument,
             data: {
-              posts: [...(data?.insert_posts?.returning ?? []), ...(newPostsData?.posts ?? [])],
+              posts: [...(data?.insert_posts?.returning ?? []), ...(existingPostsData?.posts ?? [])],
             },
           });
         },
@@ -99,7 +99,7 @@ export const PostsIndex = () => {
         <Header>
           <Logo src="./assets/images/logo.png" alt="logo" />
         </Header>
-        {notifyNewPostsLoading ? (
+        {getNewPostsLoading || insertPostLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
