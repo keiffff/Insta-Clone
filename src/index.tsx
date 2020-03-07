@@ -1,8 +1,8 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { createGlobalStyle } from 'styled-components';
 import { App } from './App';
+import { ThemeProvider } from './providers/Theme';
 
 const GlobalStyle = createGlobalStyle`
   html, body {
@@ -17,18 +17,12 @@ const GlobalStyle = createGlobalStyle`
   },
 `;
 
-const theme = createMuiTheme({
-  palette: {
-    primary: { main: '#262626' },
-  },
-});
-
 ReactDOM.render(
   <>
     <GlobalStyle />
-    <MuiThemeProvider theme={theme}>
+    <ThemeProvider>
       <App />
-    </MuiThemeProvider>
+    </ThemeProvider>
   </>,
   document.getElementById('root'),
 );
