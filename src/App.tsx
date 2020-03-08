@@ -4,6 +4,7 @@ import { Button } from '@material-ui/core';
 import { Auth0Provider, useAuth0 } from './providers/Auth0';
 import { ApolloProvider } from './providers/Apollo';
 import { auth0Config } from './constants/config';
+import { LoadingScreen } from './components/LoadingScreen';
 import { PostsIndex } from './pages/PostsIndex';
 
 const AuthenticatedPages = () => (
@@ -24,7 +25,7 @@ const Pages = () => {
   const { authenticated, loginWithRedirect, loading } = useAuth0();
 
   return loading ? (
-    <span>loading</span>
+    <LoadingScreen />
   ) : authenticated ? (
     <AuthenticatedPages />
   ) : (

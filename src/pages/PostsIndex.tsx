@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef, ComponentProps } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
-import { CameraAltOutlined } from '@material-ui/icons';
+import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
@@ -35,7 +35,15 @@ const Header = styled.header`
   display: flex;
   align-items: center;
   z-index: 1000;
-  padding: 8px 0px 8px 8px;
+  padding: 8px;
+`;
+
+const UploadButtonWrapper = styled.div`
+  margin-left: 12px;
+`;
+
+const ShareButtonWrapper = styled.div`
+  margin-right: 12px;
 `;
 
 const Logo = styled.img`
@@ -133,12 +141,19 @@ export const PostsIndex = () => {
     <>
       <Page>
         <Header>
-          <Uploader ref={fileInputRef} onUpload={handleUploadFile} capture="environment">
-            <IconButton size="small" onClick={handleClickUploadButton}>
-              <CameraAltOutlined />
-            </IconButton>
-          </Uploader>
+          <UploadButtonWrapper>
+            <Uploader ref={fileInputRef} onUpload={handleUploadFile} capture="environment">
+              <IconButton size="small" onClick={handleClickUploadButton}>
+                <CameraAltOutlined />
+              </IconButton>
+            </Uploader>
+          </UploadButtonWrapper>
           <Logo src="./assets/images/logo.png" alt="logo" />
+          <ShareButtonWrapper>
+            <IconButton size="small">
+              <Telegram />
+            </IconButton>
+          </ShareButtonWrapper>
         </Header>
         {getNewPostsLoading || insertPostLoading ? (
           <CircularProgressWrapper>
