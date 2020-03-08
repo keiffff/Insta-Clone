@@ -61,7 +61,9 @@ const AddButtonWrapper = styled.div`
 
 export const PostsIndex = () => {
   const { user: currentUser } = useAuth0();
-  const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery();
+  const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
+    variables: { userId: currentUser.sub },
+  });
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -111,9 +113,9 @@ export const PostsIndex = () => {
           </CircularProgressWrapper>
         ) : (
           <List>
-            {getNewPostsData?.posts.map(({ id, caption, image, user }) => (
+            {getNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
               <li key={id}>
-                <PostItem image={image} caption={caption} user={user} />
+                <PostItem image={image} caption={caption} user={user} liked={likes.length > 0} />
               </li>
             )) || null}
           </List>
