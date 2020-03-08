@@ -1,25 +1,26 @@
 import React, { useCallback, useState, ComponentProps } from 'react';
 import styled from 'styled-components';
-import { IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
 import { useLocation, useHistory } from 'react-router-dom';
 import { PageFooter } from '../components/PageFooter';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
-import { GetNewPostsDocument, useInsertPostMutation } from '../types/hasura';
+import { GetNewPostsDocument, useInsertPostMutation, useGetUsersInfoQuery } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
 import { paths } from '../constants/paths';
 
 const Page = styled.div`
-  padding: 48px 0px 80px;
+  padding-top: 48px;
   display: flex;
+  background: #ffffff;
   justify-content: center;
   width: 100%;
+  border-bottom: 1px solid #dbdbdb;
 `;
 
 const Header = styled.header`
-  background: #ffffff;
   position: fixed;
   top: 0;
   width: 100%;
@@ -27,6 +28,10 @@ const Header = styled.header`
   align-items: center;
   z-index: 1000;
   padding: 8px;
+`;
+
+const CircularProgressWrapper = styled.div`
+  padding: 8px 0;
 `;
 
 const BackButtonWrapper = styled.div`
@@ -43,6 +48,67 @@ const MenuButtonWrapper = styled.div`
   margin-right: 12px;
 `;
 
+const UsersProfile = styled.div`
+  padding: 12px;
+  border-bottom: 1px solid #dbdbdb;
+`;
+
+const UsersInfo = styled.div`
+  width: 100%;
+  display: flex;
+  margin-bottom: 16px;
+`;
+
+const Avatar = styled.img`
+  width: 25%;
+  border-radius: 50%;
+`;
+
+const Summary = styled.div`
+  width: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Cell = styled.div`
+  & + & {
+    margin-left: 24px;
+  }
+`;
+
+const CellValue = styled.span`
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: elipsis;
+`;
+
+const CellLabel = styled.label`
+  display: block;
+  text-align: center;
+  font-size: 14px;
+`;
+
+const EditProfileButton = styled(Button)`
+  width: 100%;
+  .MuiButton-label {
+    font-weight: bold;
+  }
+`;
+
+const UsersPosts = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const PostImage = styled.img`
+  width: calc(100% / 3);
+`;
+
 const DrawerHandle = styled.span`
   display: inline-flex;
   width: 20%;
@@ -56,6 +122,9 @@ export const Profile = () => {
   const history = useHistory();
   const location = useLocation();
   const { user: currentUser, logout } = useAuth0();
+  const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
+    variables: { id: currentUser.sub },
+  });
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -120,6 +189,39 @@ export const Profile = () => {
             </IconButton>
           </MenuButtonWrapper>
         </Header>
+        {getUsersInfoLoading ? (
+          <CircularProgressWrapper>
+            <CircularProgress size={30} />
+          </CircularProgressWrapper>
+        ) : (
+          <div>
+            <UsersProfile>
+              <UsersInfo>
+                <Avatar src={currentUser.picture} />
+                <Summary>
+                  <Cell>
+                    <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
+                    <CellLabel>投稿</CellLabel>
+                  </Cell>
+                  <Cell>
+                    <CellValue>0</CellValue>
+                    <CellLabel>フォロワー</CellLabel>
+                  </Cell>
+                  <Cell>
+                    <CellValue>0</CellValue>
+                    <CellLabel>フォロー中</CellLabel>
+                  </Cell>
+                </Summary>
+              </UsersInfo>
+              <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
+            </UsersProfile>
+            <UsersPosts>
+              {getUsersInfoData?.users[0].posts.map(({ id, image }) => (
+                <PostImage key={id} src={image} />
+              ))}
+            </UsersPosts>
+          </div>
+        )}
         <PageFooter
           user={{ id: currentUser.sub, avatar: currentUser.picture }}
           currentPath={location.pathname}
