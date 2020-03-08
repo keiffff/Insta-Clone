@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import {
   Avatar,
   Card,
@@ -19,6 +19,7 @@ import {
 import styled from 'styled-components';
 
 type Props = {
+  id: number;
   image: string;
   caption: string;
   liked?: boolean;
@@ -26,6 +27,7 @@ type Props = {
     avatar: string;
     name: string;
   };
+  onClick: (action: 'like' | 'unlike', postId: number) => void;
 };
 
 const CardHeader = styled(CardHeaderOrigin)`
@@ -60,34 +62,40 @@ const CardContent = styled(CardContentOrigin)`
   }
 `;
 
-export const PostItem = ({ image, caption, liked = false, user }: Props) => (
-  <Card>
-    <CardHeader
-      avatar={<Avatar src={user.avatar} />}
-      action={
-        <IconButton size="small">
-          <MoreHoriz />
-        </IconButton>
-      }
-      title={user.name}
-    />
-    <CardMedia image={image} />
-    <CardActions disableSpacing>
-      <FeedbackActions>
-        <IconButton size="small">{liked ? <LikeIcon /> : <FavoriteBorder />}</IconButton>
-        <IconButton size="small">
-          <ChatBubbleOutline />
-        </IconButton>
-        <IconButton size="small">
-          <Telegram />
-        </IconButton>
-      </FeedbackActions>
-      <SaveAsCollectionButtonWrapper>
-        <IconButton size="small">
-          <TurnedInNot />
-        </IconButton>
-      </SaveAsCollectionButtonWrapper>
-    </CardActions>
-    <CardContent>{caption}</CardContent>
-  </Card>
-);
+export const PostItem = ({ id, image, caption, liked = false, user, onClick }: Props) => {
+  const handleClickLike = useCallback(() => onClick(liked ? 'unlike' : 'like', id), [onClick, liked, id]);
+
+  return (
+    <Card>
+      <CardHeader
+        avatar={<Avatar src={user.avatar} />}
+        action={
+          <IconButton size="small">
+            <MoreHoriz />
+          </IconButton>
+        }
+        title={user.name}
+      />
+      <CardMedia image={image} />
+      <CardActions disableSpacing>
+        <FeedbackActions>
+          <IconButton size="small" onClick={handleClickLike}>
+            {liked ? <LikeIcon /> : <FavoriteBorder />}
+          </IconButton>
+          <IconButton size="small">
+            <ChatBubbleOutline />
+          </IconButton>
+          <IconButton size="small">
+            <Telegram />
+          </IconButton>
+        </FeedbackActions>
+        <SaveAsCollectionButtonWrapper>
+          <IconButton size="small">
+            <TurnedInNot />
+          </IconButton>
+        </SaveAsCollectionButtonWrapper>
+      </CardActions>
+      <CardContent>{caption}</CardContent>
+    </Card>
+  );
+};

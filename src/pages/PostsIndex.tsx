@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, ComponentProps } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
 import { AddBoxOutlined, CameraAltOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
@@ -6,7 +6,14 @@ import { useAuth0 } from '../providers/Auth0';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
-import { GetNewPostsDocument, GetNewPostsQuery, useGetNewPostsQuery, useInsertPostMutation } from '../types/hasura';
+import {
+  GetNewPostsDocument,
+  GetNewPostsQuery,
+  useDeleteLikeMutation,
+  useGetNewPostsQuery,
+  useInsertPostMutation,
+  useInsertLikeMutation,
+} from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 
 const Page = styled.div`
@@ -66,6 +73,8 @@ export const PostsIndex = () => {
   });
   const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
+  const [insertLike] = useInsertLikeMutation();
+  const [deleteLike] = useDeleteLikeMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
@@ -95,6 +104,27 @@ export const PostsIndex = () => {
     },
     [insertPost, currentUser],
   );
+  const handleClick = useCallback<ComponentProps<typeof PostItem>['onClick']>(
+    (action, postId) => {
+      switch (action) {
+        case 'like':
+          insertLike({
+            variables: { postId, userId: currentUser.sub },
+            refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
+          });
+          break;
+        case 'unlike':
+          deleteLike({
+            variables: { postId, userId: currentUser.sub },
+            refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
+          });
+          break;
+        default:
+          break;
+      }
+    },
+    [insertLike, deleteLike, currentUser],
+  );
 
   return (
     <>
@@ -115,7 +145,14 @@ export const PostsIndex = () => {
           <List>
             {getNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
               <li key={id}>
-                <PostItem image={image} caption={caption} user={user} liked={likes.length > 0} />
+                <PostItem
+                  id={id}
+                  image={image}
+                  caption={caption}
+                  user={user}
+                  liked={likes.length > 0}
+                  onClick={handleClick}
+                />
               </li>
             )) || null}
           </List>
