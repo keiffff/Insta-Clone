@@ -46,11 +46,9 @@ const SubmitButton = styled(Button)`
   }
 `;
 
-const CONTAINER_HEIGHT = 144;
-
 const Container = styled.div`
   width: 100%;
-  height: ${CONTAINER_HEIGHT}px;
+  height: 20%;
   display: flex;
   align-items: center;
   padding: 8px;
@@ -59,13 +57,12 @@ const Container = styled.div`
 `;
 
 const UploadedImage = styled.img`
-  width: ${CONTAINER_HEIGHT}px;
-  height: ${CONTAINER_HEIGHT}px;
+  width: 50%;
 `;
 
 const Caption = styled.textarea`
-  width: calc(100% - ${CONTAINER_HEIGHT}px);
-  height: ${CONTAINER_HEIGHT}px;
+  width: 50%;
+  height: inherit;
   padding: 0;
   margin-left: 8px;
   outline: none;
