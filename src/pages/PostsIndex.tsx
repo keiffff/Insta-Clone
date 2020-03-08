@@ -1,9 +1,11 @@
-import React, { useCallback, useRef, useState, ComponentProps } from 'react';
+import React, { useCallback, useState, useRef, ComponentProps } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
-import { AddBoxOutlined, CameraAltOutlined } from '@material-ui/icons';
+import { CameraAltOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
+import { useLocation, useHistory } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
 import { PostItem } from '../components/PostItem';
+import { PageFooter } from '../components/PageFooter';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
 import {
@@ -15,6 +17,7 @@ import {
   useInsertLikeMutation,
 } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
+import { paths } from '../constants/paths';
 
 const Page = styled.div`
   padding: 48px 0px 80px;
@@ -51,22 +54,9 @@ const List = styled.ul`
   list-style: none;
 `;
 
-const Footer = styled.footer`
-  background: #ffffff;
-  border-top: 1px solid #dbdbdb;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  z-index: 1000;
-  padding: 8px;
-`;
-
-const AddButtonWrapper = styled.div`
-  margin: auto;
-`;
-
 export const PostsIndex = () => {
+  const history = useHistory();
+  const location = useLocation();
   const { user: currentUser } = useAuth0();
   const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
     variables: { userId: currentUser.sub },
@@ -104,7 +94,7 @@ export const PostsIndex = () => {
     },
     [insertPost, currentUser],
   );
-  const handleClick = useCallback<ComponentProps<typeof PostItem>['onClick']>(
+  const handleClickPostItem = useCallback<ComponentProps<typeof PostItem>['onClick']>(
     (action, postId) => {
       const likeOptions = {
         variables: { postId, userId: currentUser.sub },
@@ -122,6 +112,21 @@ export const PostsIndex = () => {
       }
     },
     [insertLike, deleteLike, currentUser],
+  );
+  const handleClickPageFooter = useCallback<ComponentProps<typeof PageFooter>['onClick']>(
+    action => {
+      switch (action) {
+        case 'home':
+          history.push(paths.home);
+          break;
+        case 'profile':
+          history.push(`${paths.profile}/${currentUser.sub}`);
+          break;
+        default:
+          break;
+      }
+    },
+    [history, currentUser],
   );
 
   return (
@@ -149,21 +154,18 @@ export const PostsIndex = () => {
                   caption={caption}
                   user={user}
                   liked={likes.length > 0}
-                  onClick={handleClick}
+                  onClick={handleClickPostItem}
                 />
               </li>
             )) || null}
           </List>
         )}
-        <Footer>
-          <AddButtonWrapper>
-            <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
-              <IconButton size="small" onClick={handleClickUploadButton}>
-                <AddBoxOutlined />
-              </IconButton>
-            </Uploader>
-          </AddButtonWrapper>
-        </Footer>
+        <PageFooter
+          user={{ id: currentUser.sub, avatar: currentUser.picture }}
+          currentPath={location.pathname}
+          onClick={handleClickPageFooter}
+          onUploadFile={handleUploadFile}
+        />
       </Page>
       {newPostScreenVisible ? (
         <NewPostScreen
