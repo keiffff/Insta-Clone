@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, ComponentProps } from 'react';
-import { CircularProgress, IconButton } from '@material-ui/core';
+import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -46,6 +46,10 @@ const ShareButtonWrapper = styled.div`
   margin-right: 12px;
 `;
 
+const LogoButtonWrapper = styled.div`
+  margin: auto;
+`;
+
 const Logo = styled.img`
   width: 100px;
   margin: auto;
@@ -75,6 +79,7 @@ export const PostsIndex = () => {
   const [deleteLike] = useDeleteLikeMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
+  const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
   const handleUploadFile = useCallback(
     (file: File) => {
@@ -148,7 +153,11 @@ export const PostsIndex = () => {
               </IconButton>
             </Uploader>
           </UploadButtonWrapper>
-          <Logo src="./assets/images/logo.png" alt="logo" />
+          <LogoButtonWrapper>
+            <Button onClick={handleClickLogo}>
+              <Logo src="./assets/images/logo.png" alt="logo" />
+            </Button>
+          </LogoButtonWrapper>
           <ShareButtonWrapper>
             <IconButton size="small">
               <Telegram />
