@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { CircularProgress, IconButton } from '@material-ui/core';
-import { AddBoxOutlined } from '@material-ui/icons';
+import { AddBoxOutlined, CameraAltOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useAuth0 } from '../providers/Auth0';
 import { PostItem } from '../components/PostItem';
@@ -10,7 +10,7 @@ import { GetNewPostsDocument, GetNewPostsQuery, useGetNewPostsQuery, useInsertPo
 import { useUploadFileMutation } from '../types/fileUpload';
 
 const Page = styled.div`
-  padding: 45px 0px 80px;
+  padding: 48px 0px 80px;
   display: flex;
   justify-content: center;
 `;
@@ -24,7 +24,7 @@ const Header = styled.header`
   display: flex;
   align-items: center;
   z-index: 1000;
-  padding: 12px;
+  padding: 8px 0px 8px 8px;
 `;
 
 const Logo = styled.img`
@@ -65,7 +65,7 @@ export const PostsIndex = () => {
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
-  const handleClickAddButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
   const handleUploadFile = useCallback(
     (file: File) => {
       uploadFile({ variables: { file } });
@@ -97,6 +97,11 @@ export const PostsIndex = () => {
     <>
       <Page>
         <Header>
+          <Uploader ref={fileInputRef} onUpload={handleUploadFile} capture="environment">
+            <IconButton size="small" onClick={handleClickUploadButton}>
+              <CameraAltOutlined />
+            </IconButton>
+          </Uploader>
           <Logo src="./assets/images/logo.png" alt="logo" />
         </Header>
         {getNewPostsLoading || insertPostLoading ? (
@@ -115,7 +120,7 @@ export const PostsIndex = () => {
         <Footer>
           <AddButtonWrapper>
             <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
-              <IconButton size="small" onClick={handleClickAddButton}>
+              <IconButton size="small" onClick={handleClickUploadButton}>
                 <AddBoxOutlined />
               </IconButton>
             </Uploader>
