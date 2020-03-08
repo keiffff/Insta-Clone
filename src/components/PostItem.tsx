@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import {
   Avatar,
-  Card,
+  Card as CardOrigin,
   CardActions,
   CardHeader as CardHeaderOrigin,
   CardContent as CardContentOrigin,
@@ -29,6 +29,13 @@ type Props = {
   };
   onClick: (action: 'like' | 'unlike', postId: number) => void;
 };
+
+const Card = styled(CardOrigin)`
+  &.MuiCard-root {
+    box-shadow: none;
+    border-radius: unset;
+  }
+`;
 
 const CardHeader = styled(CardHeaderOrigin)`
   &.MuiCardHeader-root {
