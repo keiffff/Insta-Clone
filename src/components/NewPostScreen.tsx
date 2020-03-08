@@ -62,7 +62,7 @@ const UploadedImage = styled.img`
 
 const Caption = styled.textarea`
   width: 50%;
-  height: 80%;
+  height: 100%;
   margin: 8px;
   outline: none;
   font-size: 14px;

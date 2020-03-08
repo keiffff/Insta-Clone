@@ -61,6 +61,7 @@ const UsersInfo = styled.div`
 
 const Avatar = styled.img`
   width: 25%;
+  height: 25%;
   border-radius: 50%;
 `;
 
@@ -103,6 +104,7 @@ const EditProfileButton = styled(Button)`
 const UsersPosts = styled.div`
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
 `;
 
 const PostImage = styled.img`
