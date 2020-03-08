@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   Avatar,
   Card as CardOrigin,
@@ -70,7 +70,15 @@ const CardContent = styled(CardContentOrigin)`
 `;
 
 export const PostItem = ({ id, image, caption, liked = false, user, onClick }: Props) => {
-  const handleClickLike = useCallback(() => onClick(liked ? 'unlike' : 'like', id), [onClick, liked, id]);
+  const [like, setLike] = useState(false);
+  const handleClickLike = useCallback(() => {
+    setLike(v => !v);
+    onClick(liked ? 'unlike' : 'like', id);
+  }, [onClick, liked, id]);
+  useEffect(() => {
+    setLike(liked);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Card>
@@ -87,7 +95,7 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
       <CardActions disableSpacing>
         <FeedbackActions>
           <IconButton size="small" onClick={handleClickLike}>
-            {liked ? <LikeIcon /> : <FavoriteBorder />}
+            {like ? <LikeIcon /> : <FavoriteBorder />}
           </IconButton>
           <IconButton size="small">
             <ChatBubbleOutline />
