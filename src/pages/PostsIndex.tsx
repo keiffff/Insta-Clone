@@ -106,18 +106,16 @@ export const PostsIndex = () => {
   );
   const handleClick = useCallback<ComponentProps<typeof PostItem>['onClick']>(
     (action, postId) => {
+      const likeOptions = {
+        variables: { postId, userId: currentUser.sub },
+        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
+      };
       switch (action) {
         case 'like':
-          insertLike({
-            variables: { postId, userId: currentUser.sub },
-            refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
-          });
+          insertLike(likeOptions);
           break;
         case 'unlike':
-          deleteLike({
-            variables: { postId, userId: currentUser.sub },
-            refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
-          });
+          deleteLike(likeOptions);
           break;
         default:
           break;
