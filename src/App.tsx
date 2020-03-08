@@ -1,16 +1,23 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Auth0Provider, useAuth0 } from './providers/Auth0';
 import { ApolloProvider } from './providers/Apollo';
 import { auth0Config } from './constants/config';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PostsIndex } from './pages/PostsIndex';
+import { Profile } from './pages/Profile';
+import { paths } from './constants/paths';
 
 const AuthenticatedPages = () => (
   <ApolloProvider>
-    <Route path="/">
-      <PostsIndex />
-    </Route>
+    <Switch>
+      <Route path={paths.home} exact>
+        <PostsIndex />
+      </Route>
+      <Route path={`${paths.profile}/:id`}>
+        <Profile />
+      </Route>
+    </Switch>
   </ApolloProvider>
 );
 

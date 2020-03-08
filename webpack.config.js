@@ -11,7 +11,7 @@ module.exports = {
   },
   devServer: {
     open: true,
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: path.resolve(__dirname, 'dist'),
     historyApiFallback: true,
     watchContentBase: true,
     port: 3000,
@@ -28,5 +28,6 @@ module.exports = {
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: '/',
   },
 };
