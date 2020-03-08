@@ -19,7 +19,7 @@ import { useUploadFileMutation } from '../types/fileUpload';
 import { paths } from '../constants/paths';
 
 const Page = styled.div`
-  padding: 48px 0px 80px;
+  padding: 48px 0px 56px;
   display: flex;
   justify-content: center;
   width: 100%;

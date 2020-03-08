@@ -10,6 +10,7 @@ export const GET_NEW_POSTS = gql`
         id
       }
       user {
+        id
         avatar
         name
       }

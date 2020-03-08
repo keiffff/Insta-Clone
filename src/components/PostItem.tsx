@@ -17,6 +17,8 @@ import {
   TurnedInNot,
 } from '@material-ui/icons';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { paths } from '../constants/paths';
 
 type Props = {
   id: number;
@@ -24,6 +26,7 @@ type Props = {
   caption: string;
   liked?: boolean;
   user: {
+    id: string;
     avatar: string;
     name: string;
   };
@@ -44,6 +47,12 @@ const CardHeader = styled(CardHeaderOrigin)`
   .MuiCardHeader-action {
     margin: auto;
   }
+`;
+
+const CardHeaderInnerLink = styled(Link)`
+  text-decoration: none;
+  font-weight: bold;
+  color: #262626;
 `;
 
 const CardMedia = styled(CardMediaOrigin)`
@@ -89,7 +98,7 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
             <MoreHoriz />
           </IconButton>
         }
-        title={user.name}
+        title={<CardHeaderInnerLink to={`${paths.profile}/${user.id}`}>{user.name}</CardHeaderInnerLink>}
       />
       <CardMedia image={image} />
       <CardActions disableSpacing>

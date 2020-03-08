@@ -2,7 +2,7 @@ import React, { useCallback, useState, ComponentProps } from 'react';
 import styled from 'styled-components';
 import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { PageFooter } from '../components/PageFooter';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -123,9 +123,10 @@ const DrawerHandle = styled.span`
 export const Profile = () => {
   const history = useHistory();
   const location = useLocation();
+  const { id: userId } = useParams<{ id: string }>();
   const { user: currentUser, logout } = useAuth0();
   const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
-    variables: { id: currentUser.sub },
+    variables: { id: userId },
   });
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
@@ -199,7 +200,7 @@ export const Profile = () => {
           <div>
             <UsersProfile>
               <UsersInfo>
-                <Avatar src={currentUser.picture} />
+                <Avatar src={getUsersInfoData?.users[0].avatar} />
                 <Summary>
                   <Cell>
                     <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
@@ -218,9 +219,7 @@ export const Profile = () => {
               <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
             </UsersProfile>
             <UsersPosts>
-              {getUsersInfoData?.users[0].posts.map(({ id, image }) => (
-                <PostImage key={id} src={image} />
-              ))}
+              {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
             </UsersPosts>
           </div>
         )}
