@@ -206,11 +206,15 @@ export const Profile = () => {
                   <CellLabel>投稿</CellLabel>
                 </Cell>
                 <Cell>
-                  <CellValue>0</CellValue>
+                  <CellValue>
+                    {getUsersInfoData?.users[0].followsByFollowerId_aggregate.aggregate?.count ?? 0}
+                  </CellValue>
                   <CellLabel>フォロワー</CellLabel>
                 </Cell>
                 <Cell>
-                  <CellValue>0</CellValue>
+                  <CellValue>
+                    {getUsersInfoData?.users[0].followsByFollowingId_aggregate.aggregate?.count ?? 0}
+                  </CellValue>
                   <CellLabel>フォロー中</CellLabel>
                 </Cell>
               </Summary>
