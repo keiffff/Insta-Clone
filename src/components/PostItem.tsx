@@ -8,12 +8,20 @@ import {
   CardMedia as CardMediaOrigin,
   IconButton,
 } from '@material-ui/core';
-import { ChatBubbleOutline, FavoriteBorder, MoreHoriz, Telegram, TurnedInNot } from '@material-ui/icons';
+import {
+  ChatBubbleOutline,
+  FavoriteBorder,
+  FavoriteOutlined,
+  MoreHoriz,
+  Telegram,
+  TurnedInNot,
+} from '@material-ui/icons';
 import styled from 'styled-components';
 
 type Props = {
   image: string;
   caption: string;
+  liked?: boolean;
   user: {
     avatar: string;
     name: string;
@@ -38,6 +46,10 @@ const FeedbackActions = styled.div`
   display: flex;
 `;
 
+const LikeIcon = styled(FavoriteOutlined)`
+  color: #db183d;
+`;
+
 const SaveAsCollectionButtonWrapper = styled.div`
   margin-left: auto;
 `;
@@ -48,7 +60,7 @@ const CardContent = styled(CardContentOrigin)`
   }
 `;
 
-export const PostItem = ({ image, caption, user }: Props) => (
+export const PostItem = ({ image, caption, liked = false, user }: Props) => (
   <Card>
     <CardHeader
       avatar={<Avatar src={user.avatar} />}
@@ -62,9 +74,7 @@ export const PostItem = ({ image, caption, user }: Props) => (
     <CardMedia image={image} />
     <CardActions disableSpacing>
       <FeedbackActions>
-        <IconButton size="small">
-          <FavoriteBorder />
-        </IconButton>
+        <IconButton size="small">{liked ? <LikeIcon /> : <FavoriteBorder />}</IconButton>
         <IconButton size="small">
           <ChatBubbleOutline />
         </IconButton>

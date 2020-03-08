@@ -13,6 +13,7 @@ const Page = styled.div`
   padding: 48px 0px 80px;
   display: flex;
   justify-content: center;
+  width: 100%;
 `;
 
 const Header = styled.header`
