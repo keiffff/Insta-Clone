@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
-import { Button } from '@material-ui/core';
 import { Auth0Provider, useAuth0 } from './providers/Auth0';
 import { ApolloProvider } from './providers/Apollo';
 import { auth0Config } from './constants/config';
@@ -15,10 +14,16 @@ const AuthenticatedPages = () => (
   </ApolloProvider>
 );
 
-const UnAuthenticatedPages = ({ onClickLogin }: { onClickLogin: ReturnType<typeof useAuth0>['loginWithRedirect'] }) => {
-  const handleClickLogin = useCallback(() => onClickLogin({ returnTo: window.location.origin }), [onClickLogin]);
+const UnAuthenticatedPages = ({
+  onMountedLogin,
+}: {
+  onMountedLogin: ReturnType<typeof useAuth0>['loginWithRedirect'];
+}) => {
+  useEffect(() => {
+    onMountedLogin({ returnTo: window.location.origin });
+  }, [onMountedLogin]);
 
-  return <Button onClick={handleClickLogin}>ログインしてないよ</Button>;
+  return <></>;
 };
 
 const Pages = () => {
@@ -29,7 +34,7 @@ const Pages = () => {
   ) : authenticated ? (
     <AuthenticatedPages />
   ) : (
-    <UnAuthenticatedPages onClickLogin={loginWithRedirect} />
+    <UnAuthenticatedPages onMountedLogin={loginWithRedirect} />
   );
 };
 
