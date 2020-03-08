@@ -1,6 +1,6 @@
-import React, { useCallback, useState, ComponentProps } from 'react';
+import React, { useCallback, useState, useMemo, ComponentProps } from 'react';
 import styled from 'styled-components';
-import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
+import { Button, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { PageFooter } from '../components/PageFooter';
@@ -28,10 +28,6 @@ const Header = styled.header`
   align-items: center;
   z-index: 1000;
   padding: 8px;
-`;
-
-const CircularProgressWrapper = styled.div`
-  padding: 8px 0;
 `;
 
 const BackButtonWrapper = styled.div`
@@ -101,6 +97,13 @@ const EditProfileButton = styled(Button)`
   }
 `;
 
+const FollowButton = styled(Button)`
+  width: 100%;
+  .MuiButton-label {
+    font-weight: bold;
+  }
+`;
+
 const UsersPosts = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -134,6 +137,7 @@ export const Profile = () => {
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState('');
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
+  const viewingSelf = useMemo(() => currentUser.sub === userId, [currentUser, userId]);
   const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleClickLogout = useCallback(() => logout({ returnTo: window.location.origin }), [logout]);
@@ -174,7 +178,7 @@ export const Profile = () => {
     [history, currentUser],
   );
 
-  return uploadFileLoading || insertPostLoading ? (
+  return getUsersInfoLoading || uploadFileLoading || insertPostLoading ? (
     <LoadingScreen />
   ) : (
     <>
@@ -185,44 +189,42 @@ export const Profile = () => {
               <ChevronLeft />
             </IconButton>
           </BackButtonWrapper>
-          <UserNameLabel>{currentUser.name}</UserNameLabel>
+          <UserNameLabel>{getUsersInfoData?.users[0].name ?? ''}</UserNameLabel>
           <MenuButtonWrapper>
             <IconButton size="small" onClick={handleOpenDrawer}>
               <Menu />
             </IconButton>
           </MenuButtonWrapper>
         </Header>
-        {getUsersInfoLoading ? (
-          <CircularProgressWrapper>
-            <CircularProgress size={30} />
-          </CircularProgressWrapper>
-        ) : (
-          <div>
-            <UsersProfile>
-              <UsersInfo>
-                <Avatar src={getUsersInfoData?.users[0].avatar} />
-                <Summary>
-                  <Cell>
-                    <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
-                    <CellLabel>投稿</CellLabel>
-                  </Cell>
-                  <Cell>
-                    <CellValue>0</CellValue>
-                    <CellLabel>フォロワー</CellLabel>
-                  </Cell>
-                  <Cell>
-                    <CellValue>0</CellValue>
-                    <CellLabel>フォロー中</CellLabel>
-                  </Cell>
-                </Summary>
-              </UsersInfo>
+        <div>
+          <UsersProfile>
+            <UsersInfo>
+              <Avatar src={getUsersInfoData?.users[0].avatar} />
+              <Summary>
+                <Cell>
+                  <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
+                  <CellLabel>投稿</CellLabel>
+                </Cell>
+                <Cell>
+                  <CellValue>0</CellValue>
+                  <CellLabel>フォロワー</CellLabel>
+                </Cell>
+                <Cell>
+                  <CellValue>0</CellValue>
+                  <CellLabel>フォロー中</CellLabel>
+                </Cell>
+              </Summary>
+            </UsersInfo>
+            {viewingSelf ? (
               <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
-            </UsersProfile>
-            <UsersPosts>
-              {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
-            </UsersPosts>
-          </div>
-        )}
+            ) : (
+              <FollowButton variant="outlined">フォローする</FollowButton>
+            )}
+          </UsersProfile>
+          <UsersPosts>
+            {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
+          </UsersPosts>
+        </div>
         <PageFooter
           user={{ id: currentUser.sub, avatar: currentUser.picture }}
           currentPath={location.pathname}
