@@ -1,18 +1,13 @@
 import React, { useCallback, useState, ChangeEventHandler } from 'react';
-import { CircularProgress, Button, IconButton } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import styled from 'styled-components';
 
 type Props = {
   imageUrl?: string;
-  loading: boolean;
-  onSubmit: (imageUrl: string, caption: string) => void;
+  onSubmit: (caption: string) => void;
   onClose: () => void;
 };
-
-const CircularProgressWrapper = styled.div`
-  padding: 8px 0;
-`;
 
 const Screen = styled.div`
   width: 100%;
@@ -78,7 +73,7 @@ const Caption = styled.textarea`
   resize: none;
 `;
 
-export const NewPostScreen = ({ imageUrl, loading, onSubmit, onClose }: Props) => {
+export const NewPostScreen = ({ imageUrl, onSubmit, onClose }: Props) => {
   const [caption, setCaption] = useState('');
   const handleChangeCaption = useCallback<ChangeEventHandler<HTMLTextAreaElement>>(
     e => setCaption(e.currentTarget.value),
@@ -86,7 +81,7 @@ export const NewPostScreen = ({ imageUrl, loading, onSubmit, onClose }: Props) =
   );
   const handleClickSubmit = useCallback(() => {
     if (!imageUrl || !caption) return;
-    onSubmit(imageUrl, caption);
+    onSubmit(caption);
   }, [imageUrl, caption, onSubmit]);
 
   return (
@@ -100,11 +95,7 @@ export const NewPostScreen = ({ imageUrl, loading, onSubmit, onClose }: Props) =
           シェア
         </SubmitButton>
       </Header>
-      {loading ? (
-        <CircularProgressWrapper>
-          <CircularProgress size={30} />
-        </CircularProgressWrapper>
-      ) : imageUrl ? (
+      {imageUrl ? (
         <Container>
           <UploadedImage src={imageUrl} alt="uploaded-image" />
           <Caption placeholder="キャプションを書く" onChange={handleChangeCaption} />

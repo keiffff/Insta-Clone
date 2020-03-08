@@ -10,7 +10,6 @@ import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
 import {
   GetNewPostsDocument,
-  GetNewPostsQuery,
   useDeleteLikeMutation,
   useGetNewPostsQuery,
   useInsertPostMutation,
@@ -73,39 +72,35 @@ export const PostsIndex = () => {
   const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
     variables: { userId: currentUser.sub },
   });
-  const [uploadFile, { loading: uploadFileLoading, data: uploadFileData }] = useUploadFileMutation();
+  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const [insertLike] = useInsertLikeMutation();
   const [deleteLike] = useDeleteLikeMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
+  const [previewUrl, setPreviewUrl] = useState('');
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
-  const handleUploadFile = useCallback(
-    (file: File) => {
-      uploadFile({ variables: { file } });
-      setNewPostScreenVisible(true);
-    },
-    [uploadFile],
-  );
+  const handleUploadFile = useCallback((fileArg: File) => {
+    setFile(fileArg);
+    const reader = new FileReader();
+    reader.readAsDataURL(fileArg);
+    reader.onload = () => setPreviewUrl(reader.result as string);
+    setNewPostScreenVisible(true);
+  }, []);
   const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
   const handleSubmitNewPost = useCallback(
-    (imageUrl: string, caption: string) => {
-      insertPost({
-        variables: { image: imageUrl, caption, userId: currentUser.sub },
-        update(cache, { data }) {
-          const existingPostsData = cache.readQuery<GetNewPostsQuery>({ query: GetNewPostsDocument });
-          cache.writeQuery({
-            query: GetNewPostsDocument,
-            data: {
-              posts: [...(data?.insert_posts?.returning ?? []), ...(existingPostsData?.posts ?? [])],
-            },
-          });
-        },
-      });
+    async (caption: string) => {
       setNewPostScreenVisible(false);
+      const { data: uploadFileData } = await uploadFile({ variables: { file } });
+      if (!uploadFileData?.uploadFile) return;
+      insertPost({
+        variables: { image: uploadFileData.uploadFile, caption, userId: currentUser.sub },
+        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
+      });
     },
-    [insertPost, currentUser],
+    [uploadFile, insertPost, currentUser, file],
   );
   const handleClickPostItem = useCallback<ComponentProps<typeof PostItem>['onClick']>(
     (action, postId) => {
@@ -164,7 +159,7 @@ export const PostsIndex = () => {
             </IconButton>
           </ShareButtonWrapper>
         </Header>
-        {getNewPostsLoading || insertPostLoading ? (
+        {getNewPostsLoading || insertPostLoading || uploadFileLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
@@ -192,12 +187,7 @@ export const PostsIndex = () => {
         />
       </Page>
       {newPostScreenVisible ? (
-        <NewPostScreen
-          imageUrl={uploadFileData?.uploadFile || ''}
-          loading={uploadFileLoading}
-          onSubmit={handleSubmitNewPost}
-          onClose={handleCloseNewPostScreen}
-        />
+        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
       ) : null}
     </>
   );
