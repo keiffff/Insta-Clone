@@ -14,16 +14,6 @@ export const GET_USERS_POST = gql`
           count
         }
       }
-      followsByFollowerId_aggregate {
-        aggregate {
-          count
-        }
-      }
-      followsByFollowingId_aggregate {
-        aggregate {
-          count
-        }
-      }
     }
   }
 `;

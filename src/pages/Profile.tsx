@@ -7,14 +7,13 @@ import { PageFooter } from '../components/PageFooter';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
 import {
-  GetFollowDocument,
-  GetUsersInfoDocument,
+  GetFollowInfoDocument,
   GetNewPostsDocument,
   useDeleteFollowMutation,
   useInsertFollowMutation,
   useInsertPostMutation,
   useGetUsersInfoQuery,
-  useGetFollowQuery,
+  useGetFollowInfoQuery,
 } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
@@ -140,24 +139,16 @@ export const Profile = () => {
   const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
     variables: { id: userId },
   });
-  const { loading: getFollowLoading, data: getFollowData } = useGetFollowQuery({
+  const { loading: getFollowInfoLoading, data: getFollowInfoData } = useGetFollowInfoQuery({
     variables: { followingId: currentUser.sub, followerId: userId },
   });
   const [insertFollow] = useInsertFollowMutation({
     variables: { followingId: currentUser.sub, followerId: userId },
-    refetchQueries: [
-      { query: GetUsersInfoDocument, variables: { id: userId } },
-      { query: GetUsersInfoDocument, variables: { id: currentUser.sub } },
-      { query: GetFollowDocument, variables: { followingId: currentUser.sub, followerId: userId } },
-    ],
+    refetchQueries: [{ query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } }],
   });
   const [deleteFollow] = useDeleteFollowMutation({
     variables: { followingId: currentUser.sub, followerId: userId },
-    refetchQueries: [
-      { query: GetUsersInfoDocument, variables: { id: userId } },
-      { query: GetUsersInfoDocument, variables: { id: currentUser.sub } },
-      { query: GetFollowDocument, variables: { followingId: currentUser.sub, followerId: userId } },
-    ],
+    refetchQueries: [{ query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } }],
   });
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
@@ -208,7 +199,7 @@ export const Profile = () => {
     [history, currentUser],
   );
 
-  return getUsersInfoLoading || getFollowLoading || uploadFileLoading || insertPostLoading ? (
+  return getUsersInfoLoading || getFollowInfoLoading || uploadFileLoading || insertPostLoading ? (
     <LoadingScreen />
   ) : (
     <>
@@ -236,22 +227,18 @@ export const Profile = () => {
                   <CellLabel>投稿</CellLabel>
                 </Cell>
                 <Cell>
-                  <CellValue>
-                    {getUsersInfoData?.users[0].followsByFollowerId_aggregate.aggregate?.count ?? 0}
-                  </CellValue>
+                  <CellValue>{getFollowInfoData?.followersCount?.aggregate?.count ?? 0}</CellValue>
                   <CellLabel>フォロワー</CellLabel>
                 </Cell>
                 <Cell>
-                  <CellValue>
-                    {getUsersInfoData?.users[0].followsByFollowingId_aggregate.aggregate?.count ?? 0}
-                  </CellValue>
+                  <CellValue>{getFollowInfoData?.followingCount?.aggregate?.count ?? 0}</CellValue>
                   <CellLabel>フォロー中</CellLabel>
                 </Cell>
               </Summary>
             </UsersInfo>
             {viewingSelf ? (
               <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
-            ) : getFollowData?.follow.length ? (
+            ) : getFollowInfoData?.follow.length ? (
               <FollowButton variant="outlined" onClick={handleDeleteFollow}>
                 フォローをやめる
               </FollowButton>
