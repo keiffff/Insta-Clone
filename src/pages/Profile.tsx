@@ -6,7 +6,16 @@ import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { PageFooter } from '../components/PageFooter';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
-import { GetNewPostsDocument, useInsertPostMutation, useGetUsersInfoQuery } from '../types/hasura';
+import {
+  GetFollowDocument,
+  GetUsersInfoDocument,
+  GetNewPostsDocument,
+  useDeleteFollowMutation,
+  useInsertFollowMutation,
+  useInsertPostMutation,
+  useGetUsersInfoQuery,
+  useGetFollowQuery,
+} from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
 import { paths } from '../constants/paths';
@@ -131,6 +140,25 @@ export const Profile = () => {
   const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
     variables: { id: userId },
   });
+  const { loading: getFollowLoading, data: getFollowData } = useGetFollowQuery({
+    variables: { followingId: currentUser.sub, followerId: userId },
+  });
+  const [insertFollow] = useInsertFollowMutation({
+    variables: { followingId: currentUser.sub, followerId: userId },
+    refetchQueries: [
+      { query: GetUsersInfoDocument, variables: { id: userId } },
+      { query: GetUsersInfoDocument, variables: { id: currentUser.sub } },
+      { query: GetFollowDocument, variables: { followingId: currentUser.sub, followerId: userId } },
+    ],
+  });
+  const [deleteFollow] = useDeleteFollowMutation({
+    variables: { followingId: currentUser.sub, followerId: userId },
+    refetchQueries: [
+      { query: GetUsersInfoDocument, variables: { id: userId } },
+      { query: GetUsersInfoDocument, variables: { id: currentUser.sub } },
+      { query: GetFollowDocument, variables: { followingId: currentUser.sub, followerId: userId } },
+    ],
+  });
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -142,6 +170,8 @@ export const Profile = () => {
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleClickLogout = useCallback(() => logout({ returnTo: window.location.origin }), [logout]);
   const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
+  const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
+  const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
   const handleSubmitNewPost = useCallback(
     async (caption: string) => {
       setNewPostScreenVisible(false);
@@ -178,7 +208,7 @@ export const Profile = () => {
     [history, currentUser],
   );
 
-  return getUsersInfoLoading || uploadFileLoading || insertPostLoading ? (
+  return getUsersInfoLoading || getFollowLoading || uploadFileLoading || insertPostLoading ? (
     <LoadingScreen />
   ) : (
     <>
@@ -221,8 +251,14 @@ export const Profile = () => {
             </UsersInfo>
             {viewingSelf ? (
               <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
+            ) : getFollowData?.follow.length ? (
+              <FollowButton variant="outlined" onClick={handleDeleteFollow}>
+                フォローをやめる
+              </FollowButton>
             ) : (
-              <FollowButton variant="outlined">フォローする</FollowButton>
+              <FollowButton variant="outlined" onClick={handleInsertFollow}>
+                フォローする
+              </FollowButton>
             )}
           </UsersProfile>
           <UsersPosts>
