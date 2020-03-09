@@ -8,6 +8,7 @@ type Props = {
 const theme = createMuiTheme({
   palette: {
     primary: { main: '#262626' },
+    secondary: { main: '#3797f7' },
   },
 });
 

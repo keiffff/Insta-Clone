@@ -243,7 +243,7 @@ export const Profile = () => {
                 フォローをやめる
               </FollowButton>
             ) : (
-              <FollowButton variant="outlined" onClick={handleInsertFollow}>
+              <FollowButton variant="contained" color="secondary" onClick={handleInsertFollow}>
                 フォローする
               </FollowButton>
             )}
