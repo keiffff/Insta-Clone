@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-export const GET_USERS_POST = gql`
+export const GET_USERS_INFO = gql`
   query getUsersInfo($id: String!) {
     users(where: { id: { _eq: $id } }) {
       name
