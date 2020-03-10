@@ -56,8 +56,24 @@ const Container = styled.div`
   border-bottom: 1px solid #dbdbdb;
 `;
 
-const UploadedImage = styled.img`
+const UploadedImageWrapper = styled.div`
+  position: relative;
   width: 50%;
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+`;
+
+const UploadedImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const Caption = styled.textarea`
@@ -93,7 +109,9 @@ export const NewPostScreen = ({ imageUrl, onSubmit, onClose }: Props) => {
       </Header>
       {imageUrl ? (
         <Container>
-          <UploadedImage src={imageUrl} alt="uploaded-image" />
+          <UploadedImageWrapper>
+            <UploadedImage src={imageUrl} alt="uploaded-image" />
+          </UploadedImageWrapper>
           <Caption placeholder="キャプションを書く" onChange={handleChangeCaption} />
         </Container>
       ) : null}

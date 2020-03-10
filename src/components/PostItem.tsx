@@ -55,9 +55,24 @@ const CardHeaderInnerLink = styled(Link)`
   color: #262626;
 `;
 
-const CardMedia = styled(CardMediaOrigin)`
+const CardMediaWrapper = styled.div`
+  position: relative;
   width: 100%;
-  padding: 144px 0px;
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+`;
+
+const CardMedia = styled(CardMediaOrigin)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const FeedbackActions = styled.div`
@@ -100,7 +115,9 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
         }
         title={<CardHeaderInnerLink to={`${paths.profile}/${user.id}`}>{user.name}</CardHeaderInnerLink>}
       />
-      <CardMedia image={image} />
+      <CardMediaWrapper>
+        <CardMedia image={image} />
+      </CardMediaWrapper>
       <CardActions disableSpacing>
         <FeedbackActions>
           <IconButton size="small" onClick={handleClickLike}>

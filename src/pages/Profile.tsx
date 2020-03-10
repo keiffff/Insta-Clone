@@ -118,8 +118,24 @@ const UsersPosts = styled.div`
   padding-bottom: 56px;
 `;
 
-const PostImage = styled.img`
+const PostImageWrapper = styled.div`
+  position: relative;
   width: calc(100% / 3);
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+`;
+
+const PostImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const DrawerHandle = styled.span`
@@ -218,7 +234,11 @@ export const Profile = () => {
               )}
             </UsersProfile>
             <UsersPosts>
-              {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
+              {getUsersInfoData?.users[0].posts.map(({ id, image }) => (
+                <PostImageWrapper key={id}>
+                  <PostImage src={image} />
+                </PostImageWrapper>
+              )) || null}
             </UsersPosts>
           </div>
         )}
