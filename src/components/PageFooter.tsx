@@ -23,7 +23,7 @@ const Footer = styled.footer`
   width: 100%;
   display: flex;
   z-index: 1000;
-  padding: 8px;
+  padding: 8px 0px;
 `;
 
 const HomeButtonWrapper = styled.div`

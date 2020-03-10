@@ -29,7 +29,7 @@ const Header = styled.header`
   display: flex;
   align-items: center;
   z-index: 1000;
-  padding: 8px;
+  padding: 8px 0px;
 `;
 
 const UploadButtonWrapper = styled.div`
