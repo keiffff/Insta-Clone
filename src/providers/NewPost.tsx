@@ -12,7 +12,7 @@ type NewPostContext = {
   file?: File;
   previewUrl: string;
   loadFile: (file: File) => void;
-  resetFile: () => void;
+  resetUploadItem: () => void;
   submitPost: (caption: string) => void;
 };
 
@@ -21,7 +21,7 @@ const NewPostContext = createContext<NewPostContext>({
   file: undefined,
   previewUrl: '',
   loadFile: () => {},
-  resetFile: () => {},
+  resetUploadItem: () => {},
   submitPost: () => {},
 });
 
@@ -41,7 +41,7 @@ export const NewPostProvider = ({ children }: Props) => {
     reader.readAsDataURL(fileArg);
     reader.onload = () => setPreviewUrl(reader.result as string);
   }, []);
-  const resetFile = useCallback(() => setFile(undefined), []);
+  const resetUploadItem = useCallback(() => setPreviewUrl(''), []);
   const submitPost = useCallback(
     async (caption: string) => {
       const { data: uploadFileData } = await uploadFile({ variables: { file } });
@@ -56,7 +56,14 @@ export const NewPostProvider = ({ children }: Props) => {
 
   return (
     <NewPostContext.Provider
-      value={{ loading: uploadFileLoading || insertPostLoading, previewUrl, file, loadFile, resetFile, submitPost }}
+      value={{
+        loading: uploadFileLoading || insertPostLoading,
+        previewUrl,
+        file,
+        loadFile,
+        resetUploadItem,
+        submitPost,
+      }}
     >
       {children}
     </NewPostContext.Provider>

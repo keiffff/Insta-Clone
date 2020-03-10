@@ -13,17 +13,15 @@ type Props = {
 export const Layout = ({ children }: Props) => {
   const history = useHistory();
   const location = useLocation();
-  const { previewUrl, file, loadFile, resetFile, submitPost } = useNewPost();
+  const { previewUrl, loadFile, resetUploadItem, submitPost } = useNewPost();
   const { user: currentUser } = useAuth0();
-  const handleCloseNewPostScreen = useCallback(() => resetFile(), [resetFile]);
-  const handleUploadFile = useCallback((fileArg: File) => loadFile(fileArg), [loadFile]);
   const handleSubmitNewPost = useCallback(
     (caption: string) => {
-      resetFile();
+      resetUploadItem();
       history.push(paths.home);
       submitPost(caption);
     },
-    [submitPost, resetFile, history],
+    [submitPost, resetUploadItem, history],
   );
   const handleClickPageFooterNavigation = useCallback<ComponentProps<typeof PageFooter>['onClickNavigation']>(
     action => {
@@ -48,10 +46,10 @@ export const Layout = ({ children }: Props) => {
         user={{ id: currentUser.sub, avatar: currentUser.picture }}
         currentPath={location.pathname}
         onClickNavigation={handleClickPageFooterNavigation}
-        onUploadFile={handleUploadFile}
+        onUploadFile={loadFile}
       />
-      {file ? (
-        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
+      {previewUrl ? (
+        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={resetUploadItem} />
       ) : null}
     </>
   );
