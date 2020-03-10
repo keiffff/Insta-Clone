@@ -13,7 +13,7 @@ import {
   useInsertLikeMutation,
 } from '../types/hasura';
 
-const Page = styled.div`
+const Content = styled.section`
   padding: 48px 0px 56px;
   display: flex;
   justify-content: center;
@@ -93,26 +93,26 @@ export const PostsIndex = () => {
 
   return (
     <>
-      <Page>
-        <Header>
-          <UploadButtonWrapper>
-            <Uploader ref={fileInputRef} onUpload={loadFile} capture="environment">
-              <IconButton size="small" onClick={handleClickUploadButton}>
-                <CameraAltOutlined />
-              </IconButton>
-            </Uploader>
-          </UploadButtonWrapper>
-          <LogoButtonWrapper>
-            <Button onClick={handleClickLogo}>
-              <Logo src="./assets/images/logo.png" alt="logo" />
-            </Button>
-          </LogoButtonWrapper>
-          <ShareButtonWrapper>
-            <IconButton size="small">
-              <Telegram />
+      <Header>
+        <UploadButtonWrapper>
+          <Uploader ref={fileInputRef} onUpload={loadFile} capture="environment">
+            <IconButton size="small" onClick={handleClickUploadButton}>
+              <CameraAltOutlined />
             </IconButton>
-          </ShareButtonWrapper>
-        </Header>
+          </Uploader>
+        </UploadButtonWrapper>
+        <LogoButtonWrapper>
+          <Button onClick={handleClickLogo}>
+            <Logo src="./assets/images/logo.png" alt="logo" />
+          </Button>
+        </LogoButtonWrapper>
+        <ShareButtonWrapper>
+          <IconButton size="small">
+            <Telegram />
+          </IconButton>
+        </ShareButtonWrapper>
+      </Header>
+      <Content>
         {addNewPostLoading || getNewPostsLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
@@ -133,7 +133,7 @@ export const PostsIndex = () => {
             )) || null}
           </List>
         )}
-      </Page>
+      </Content>
     </>
   );
 };

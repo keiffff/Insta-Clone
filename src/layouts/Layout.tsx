@@ -40,7 +40,7 @@ export const Layout = ({ children }: Props) => {
   );
 
   return (
-    <>
+    <main>
       {children}
       <PageFooter
         user={{ id: currentUser.sub, avatar: currentUser.picture }}
@@ -51,6 +51,6 @@ export const Layout = ({ children }: Props) => {
       {previewUrl ? (
         <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={resetUploadItem} />
       ) : null}
-    </>
+    </main>
   );
 };

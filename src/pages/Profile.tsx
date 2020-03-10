@@ -14,7 +14,7 @@ import {
 import { useAuth0 } from '../providers/Auth0';
 import { paths } from '../constants/paths';
 
-const Page = styled.div`
+const Content = styled.section`
   padding-top: 48px;
   display: flex;
   background: #ffffff;
@@ -166,20 +166,20 @@ export const Profile = () => {
     <LoadingScreen />
   ) : (
     <>
-      <Page>
-        <Header>
-          <BackButtonWrapper>
-            <IconButton size="small" onClick={handleClickBackToHome}>
-              <ChevronLeft />
-            </IconButton>
-          </BackButtonWrapper>
-          <UserNameLabel>{getUsersInfoData?.users[0].name ?? ''}</UserNameLabel>
-          <MenuButtonWrapper>
-            <IconButton size="small" onClick={handleOpenDrawer}>
-              <Menu />
-            </IconButton>
-          </MenuButtonWrapper>
-        </Header>
+      <Header>
+        <BackButtonWrapper>
+          <IconButton size="small" onClick={handleClickBackToHome}>
+            <ChevronLeft />
+          </IconButton>
+        </BackButtonWrapper>
+        <UserNameLabel>{getUsersInfoData?.users[0].name ?? ''}</UserNameLabel>
+        <MenuButtonWrapper>
+          <IconButton size="small" onClick={handleOpenDrawer}>
+            <Menu />
+          </IconButton>
+        </MenuButtonWrapper>
+      </Header>
+      <Content>
         <div>
           <UsersProfile>
             <UsersInfo>
@@ -215,7 +215,7 @@ export const Profile = () => {
             {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
           </UsersPosts>
         </div>
-      </Page>
+      </Content>
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
         <DrawerHandle />
         <List>
