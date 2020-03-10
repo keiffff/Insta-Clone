@@ -1,9 +1,8 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { Button, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
 import { useHistory, useParams } from 'react-router-dom';
-import { LoadingScreen } from '../components/LoadingScreen';
 import {
   GetFollowInfoDocument,
   useDeleteFollowMutation,
@@ -21,6 +20,10 @@ const Content = styled.section`
   justify-content: center;
   width: 100%;
   border-bottom: 1px solid #dbdbdb;
+`;
+
+const CircularProgressWrapper = styled.div`
+  padding: 8px 0;
 `;
 
 const Header = styled.header`
@@ -162,9 +165,7 @@ export const Profile = () => {
   const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
   const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
 
-  return getUsersInfoLoading || getFollowInfoLoading ? (
-    <LoadingScreen />
-  ) : (
+  return (
     <>
       <Header>
         <BackButtonWrapper>
@@ -180,41 +181,47 @@ export const Profile = () => {
         </MenuButtonWrapper>
       </Header>
       <Content>
-        <div>
-          <UsersProfile>
-            <UsersInfo>
-              <Avatar src={getUsersInfoData?.users[0].avatar} />
-              <Summary>
-                <Cell>
-                  <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
-                  <CellLabel>投稿</CellLabel>
-                </Cell>
-                <Cell>
-                  <CellValue>{getFollowInfoData?.followersCount?.aggregate?.count ?? 0}</CellValue>
-                  <CellLabel>フォロワー</CellLabel>
-                </Cell>
-                <Cell>
-                  <CellValue>{getFollowInfoData?.followingCount?.aggregate?.count ?? 0}</CellValue>
-                  <CellLabel>フォロー中</CellLabel>
-                </Cell>
-              </Summary>
-            </UsersInfo>
-            {viewingSelf ? (
-              <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
-            ) : getFollowInfoData?.follow.length ? (
-              <FollowButton variant="outlined" onClick={handleDeleteFollow}>
-                フォローをやめる
-              </FollowButton>
-            ) : (
-              <FollowButton variant="contained" color="secondary" onClick={handleInsertFollow}>
-                フォローする
-              </FollowButton>
-            )}
-          </UsersProfile>
-          <UsersPosts>
-            {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
-          </UsersPosts>
-        </div>
+        {getUsersInfoLoading || getFollowInfoLoading ? (
+          <CircularProgressWrapper>
+            <CircularProgress size={30} />
+          </CircularProgressWrapper>
+        ) : (
+          <div>
+            <UsersProfile>
+              <UsersInfo>
+                <Avatar src={getUsersInfoData?.users[0].avatar} />
+                <Summary>
+                  <Cell>
+                    <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
+                    <CellLabel>投稿</CellLabel>
+                  </Cell>
+                  <Cell>
+                    <CellValue>{getFollowInfoData?.followersCount?.aggregate?.count ?? 0}</CellValue>
+                    <CellLabel>フォロワー</CellLabel>
+                  </Cell>
+                  <Cell>
+                    <CellValue>{getFollowInfoData?.followingCount?.aggregate?.count ?? 0}</CellValue>
+                    <CellLabel>フォロー中</CellLabel>
+                  </Cell>
+                </Summary>
+              </UsersInfo>
+              {viewingSelf ? (
+                <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
+              ) : getFollowInfoData?.follow.length ? (
+                <FollowButton variant="outlined" onClick={handleDeleteFollow}>
+                  フォローをやめる
+                </FollowButton>
+              ) : (
+                <FollowButton variant="contained" color="secondary" onClick={handleInsertFollow}>
+                  フォローする
+                </FollowButton>
+              )}
+            </UsersProfile>
+            <UsersPosts>
+              {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
+            </UsersPosts>
+          </div>
+        )}
       </Content>
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
         <DrawerHandle />
