@@ -34,7 +34,7 @@ const Header = styled.header`
   align-items: center;
   background: #ffffff;
   z-index: 1000;
-  padding: 8px;
+  padding: 8px 0px;
 `;
 
 const BackButtonWrapper = styled.div`
