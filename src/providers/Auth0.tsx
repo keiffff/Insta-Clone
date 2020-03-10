@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import createAuth0Client from '@auth0/auth0-spa-js';
 import Auth0Client from '@auth0/auth0-spa-js/dist/typings/Auth0Client';
 import { useHistory } from 'react-router-dom';
@@ -23,7 +23,7 @@ type Auth0Context = {
 
 type Props = { children: ReactNode } & Auth0ClientOptions;
 
-const Auth0Context = React.createContext((null as unknown) as Auth0Context);
+const Auth0Context = createContext((null as unknown) as Auth0Context);
 
 export function useAuth0() {
   return useContext(Auth0Context);

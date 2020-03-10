@@ -11,7 +11,7 @@ type Props = {
     avatar: string;
   };
   currentPath: string;
-  onClick: (action: 'home' | 'profile') => void;
+  onClickNavigation: (action: 'home' | 'profile') => void;
   onUploadFile: (file: File) => void;
 };
 
@@ -50,11 +50,11 @@ const UserIconSelected = styled(UserIcon)`
   border: 1px solid #262626;
 `;
 
-export const PageFooter = ({ user, currentPath, onClick, onUploadFile }: Props) => {
+export const PageFooter = ({ user, currentPath, onClickNavigation, onUploadFile }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const handleClickHomeButton = useCallback(() => onClick('home'), [onClick]);
+  const handleClickHomeButton = useCallback(() => onClickNavigation('home'), [onClickNavigation]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
-  const handleClickUserButton = useCallback(() => onClick('profile'), [onClick]);
+  const handleClickUserButton = useCallback(() => onClickNavigation('profile'), [onClickNavigation]);
 
   return (
     <Footer>

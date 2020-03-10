@@ -1,22 +1,17 @@
-import React, { useCallback, useState, useRef, ComponentProps } from 'react';
+import React, { useCallback, useRef, ComponentProps } from 'react';
 import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
-import { useLocation, useHistory } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
+import { useNewPost } from '../providers/NewPost';
 import { PostItem } from '../components/PostItem';
-import { PageFooter } from '../components/PageFooter';
 import { Uploader } from '../components/Uploader';
-import { NewPostScreen } from '../components/NewPostScreen';
 import {
   GetNewPostsDocument,
   useDeleteLikeMutation,
   useGetNewPostsQuery,
-  useInsertPostMutation,
   useInsertLikeMutation,
 } from '../types/hasura';
-import { useUploadFileMutation } from '../types/fileUpload';
-import { paths } from '../constants/paths';
 
 const Page = styled.div`
   padding: 48px 0px 56px;
@@ -41,12 +36,12 @@ const UploadButtonWrapper = styled.div`
   margin-left: 12px;
 `;
 
-const ShareButtonWrapper = styled.div`
-  margin-right: 12px;
-`;
-
 const LogoButtonWrapper = styled.div`
   margin: auto;
+`;
+
+const ShareButtonWrapper = styled.div`
+  margin-right: 12px;
 `;
 
 const Logo = styled.img`
@@ -66,42 +61,16 @@ const List = styled.ul`
 `;
 
 export const PostsIndex = () => {
-  const history = useHistory();
-  const location = useLocation();
   const { user: currentUser } = useAuth0();
+  const { loading: addNewPostLoading, loadFile } = useNewPost();
   const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
     variables: { userId: currentUser.sub },
   });
-  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
-  const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const [insertLike] = useInsertLikeMutation();
   const [deleteLike] = useDeleteLikeMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File>();
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
-  const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
-  const handleUploadFile = useCallback((fileArg: File) => {
-    setFile(fileArg);
-    const reader = new FileReader();
-    reader.readAsDataURL(fileArg);
-    reader.onload = () => setPreviewUrl(reader.result as string);
-    setNewPostScreenVisible(true);
-  }, []);
-  const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
-  const handleSubmitNewPost = useCallback(
-    async (caption: string) => {
-      setNewPostScreenVisible(false);
-      const { data: uploadFileData } = await uploadFile({ variables: { file } });
-      if (!uploadFileData?.uploadFile) return;
-      insertPost({
-        variables: { image: uploadFileData.uploadFile, caption, userId: currentUser.sub },
-        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
-      });
-    },
-    [uploadFile, insertPost, currentUser, file],
-  );
+  const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
   const handleClickPostItem = useCallback<ComponentProps<typeof PostItem>['onClick']>(
     (action, postId) => {
       const likeOptions = {
@@ -121,28 +90,13 @@ export const PostsIndex = () => {
     },
     [insertLike, deleteLike, currentUser],
   );
-  const handleClickPageFooter = useCallback<ComponentProps<typeof PageFooter>['onClick']>(
-    action => {
-      switch (action) {
-        case 'home':
-          history.push(paths.home);
-          break;
-        case 'profile':
-          history.push(`${paths.profile}/${currentUser.sub}`);
-          break;
-        default:
-          break;
-      }
-    },
-    [history, currentUser],
-  );
 
   return (
     <>
       <Page>
         <Header>
           <UploadButtonWrapper>
-            <Uploader ref={fileInputRef} onUpload={handleUploadFile} capture="environment">
+            <Uploader ref={fileInputRef} onUpload={loadFile} capture="environment">
               <IconButton size="small" onClick={handleClickUploadButton}>
                 <CameraAltOutlined />
               </IconButton>
@@ -159,7 +113,7 @@ export const PostsIndex = () => {
             </IconButton>
           </ShareButtonWrapper>
         </Header>
-        {getNewPostsLoading || insertPostLoading || uploadFileLoading ? (
+        {addNewPostLoading || getNewPostsLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
@@ -179,16 +133,7 @@ export const PostsIndex = () => {
             )) || null}
           </List>
         )}
-        <PageFooter
-          user={{ id: currentUser.sub, avatar: currentUser.picture }}
-          currentPath={location.pathname}
-          onClick={handleClickPageFooter}
-          onUploadFile={handleUploadFile}
-        />
       </Page>
-      {newPostScreenVisible ? (
-        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
-      ) : null}
     </>
   );
 };

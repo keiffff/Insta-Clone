@@ -1,21 +1,16 @@
-import React, { useCallback, useState, useMemo, ComponentProps } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Button, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
-import { useLocation, useHistory, useParams } from 'react-router-dom';
-import { PageFooter } from '../components/PageFooter';
-import { NewPostScreen } from '../components/NewPostScreen';
+import { useHistory, useParams } from 'react-router-dom';
 import { LoadingScreen } from '../components/LoadingScreen';
 import {
   GetFollowInfoDocument,
-  GetNewPostsDocument,
   useDeleteFollowMutation,
   useInsertFollowMutation,
-  useInsertPostMutation,
   useGetUsersInfoQuery,
   useGetFollowInfoQuery,
 } from '../types/hasura';
-import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
 import { paths } from '../constants/paths';
 
@@ -133,11 +128,11 @@ const DrawerHandle = styled.span`
 
 export const Profile = () => {
   const history = useHistory();
-  const location = useLocation();
   const { id: userId } = useParams<{ id: string }>();
   const { user: currentUser, logout } = useAuth0();
   const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
     variables: { id: userId },
+    fetchPolicy: 'cache-and-network',
   });
   const { loading: getFollowInfoLoading, data: getFollowInfoData } = useGetFollowInfoQuery({
     variables: { followingId: currentUser.sub, followerId: userId },
@@ -156,63 +151,23 @@ export const Profile = () => {
       { query: GetFollowInfoDocument, variables: { followingId: userId, followerId: currentUser.sub } },
     ],
   });
-  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
-  const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [file, setFile] = useState<File>();
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const viewingSelf = useMemo(() => currentUser.sub === userId, [currentUser, userId]);
+  const handleClickBackToHome = useCallback(() => history.push(paths.home), [history]);
   const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleClickLogout = useCallback(() => logout({ returnTo: window.location.origin }), [logout]);
-  const handleCloseNewPostScreen = useCallback(() => setNewPostScreenVisible(false), []);
   const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
   const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
-  const handleSubmitNewPost = useCallback(
-    async (caption: string) => {
-      setNewPostScreenVisible(false);
-      const { data: uploadFileData } = await uploadFile({ variables: { file } });
-      if (!uploadFileData?.uploadFile) return;
-      insertPost({
-        variables: { image: uploadFileData.uploadFile, caption, userId: currentUser.sub },
-        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
-      });
-      history.push(paths.home);
-    },
-    [uploadFile, insertPost, currentUser, file, history],
-  );
-  const handleUploadFile = useCallback((fileArg: File) => {
-    setFile(fileArg);
-    const reader = new FileReader();
-    reader.readAsDataURL(fileArg);
-    reader.onload = () => setPreviewUrl(reader.result as string);
-    setNewPostScreenVisible(true);
-  }, []);
-  const handleClickPageFooter = useCallback<ComponentProps<typeof PageFooter>['onClick']>(
-    action => {
-      switch (action) {
-        case 'home':
-          history.push(paths.home);
-          break;
-        case 'profile':
-          history.push(`${paths.profile}/${currentUser.sub}`);
-          break;
-        default:
-          break;
-      }
-    },
-    [history, currentUser],
-  );
 
-  return getUsersInfoLoading || getFollowInfoLoading || uploadFileLoading || insertPostLoading ? (
+  return getUsersInfoLoading || getFollowInfoLoading ? (
     <LoadingScreen />
   ) : (
     <>
       <Page>
         <Header>
           <BackButtonWrapper>
-            <IconButton size="small" onClick={() => handleClickPageFooter('home')}>
+            <IconButton size="small" onClick={handleClickBackToHome}>
               <ChevronLeft />
             </IconButton>
           </BackButtonWrapper>
@@ -258,16 +213,7 @@ export const Profile = () => {
             {getUsersInfoData?.users[0].posts.map(({ id, image }) => <PostImage key={id} src={image} />) || null}
           </UsersPosts>
         </div>
-        <PageFooter
-          user={{ id: currentUser.sub, avatar: currentUser.picture }}
-          currentPath={location.pathname}
-          onClick={handleClickPageFooter}
-          onUploadFile={handleUploadFile}
-        />
       </Page>
-      {newPostScreenVisible ? (
-        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
-      ) : null}
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
         <DrawerHandle />
         <List>
