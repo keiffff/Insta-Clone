@@ -144,11 +144,17 @@ export const Profile = () => {
   });
   const [insertFollow] = useInsertFollowMutation({
     variables: { followingId: currentUser.sub, followerId: userId },
-    refetchQueries: [{ query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } }],
+    refetchQueries: [
+      { query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } },
+      { query: GetFollowInfoDocument, variables: { followingId: userId, followerId: currentUser.sub } },
+    ],
   });
   const [deleteFollow] = useDeleteFollowMutation({
     variables: { followingId: currentUser.sub, followerId: userId },
-    refetchQueries: [{ query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } }],
+    refetchQueries: [
+      { query: GetFollowInfoDocument, variables: { followingId: currentUser.sub, followerId: userId } },
+      { query: GetFollowInfoDocument, variables: { followingId: userId, followerId: currentUser.sub } },
+    ],
   });
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
