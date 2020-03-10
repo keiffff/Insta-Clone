@@ -29,6 +29,7 @@ const Header = styled.header`
   width: 100%;
   display: flex;
   align-items: center;
+  background: #ffffff;
   z-index: 1000;
   padding: 8px;
 `;
@@ -111,6 +112,7 @@ const UsersPosts = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
+  padding-bottom: 56px;
 `;
 
 const PostImage = styled.img`
