@@ -1,5 +1,6 @@
 import React, { useCallback, ComponentProps, ReactNode } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
+import { useGetUsersAvatarQuery } from '../types/hasura';
 import { useAuth0 } from '../providers/Auth0';
 import { useNewPost } from '../providers/NewPost';
 import { PageFooter } from '../components/PageFooter';
@@ -14,7 +15,8 @@ export const Layout = ({ children }: Props) => {
   const history = useHistory();
   const location = useLocation();
   const { previewUrl, loadFile, resetUploadItem, submitPost } = useNewPost();
-  const { user: currentUser } = useAuth0();
+  const { user } = useAuth0();
+  const { data: getUsersAvatarData } = useGetUsersAvatarQuery({ variables: { id: user.sub } });
   const handleSubmitNewPost = useCallback(
     (caption: string) => {
       resetUploadItem();
@@ -30,20 +32,20 @@ export const Layout = ({ children }: Props) => {
           history.push(paths.home);
           break;
         case 'profile':
-          history.push(`${paths.profile}/${currentUser.sub}`);
+          history.push(`${paths.profile}/${user.sub}`);
           break;
         default:
           break;
       }
     },
-    [history, currentUser],
+    [history, user],
   );
 
   return (
     <main>
       {children}
       <PageFooter
-        user={{ id: currentUser.sub, avatar: currentUser.picture }}
+        avatar={getUsersAvatarData?.users[0].avatar || ''}
         currentPath={location.pathname}
         onClickNavigation={handleClickPageFooterNavigation}
         onUploadFile={loadFile}

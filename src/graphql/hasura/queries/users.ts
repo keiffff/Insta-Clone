@@ -17,3 +17,11 @@ export const GET_USERS_INFO = gql`
     }
   }
 `;
+
+export const GET_USERS_AVATAR = gql`
+  query getUsersAvatar($id: String!) {
+    users(where: { id: { _eq: $id } }) {
+      avatar
+    }
+  }
+`;

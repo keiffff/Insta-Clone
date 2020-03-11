@@ -6,10 +6,7 @@ import { Uploader } from './Uploader';
 import { paths } from '../constants/paths';
 
 type Props = {
-  user: {
-    id: string;
-    avatar: string;
-  };
+  avatar: string;
   currentPath: string;
   onClickNavigation: (action: 'home' | 'profile') => void;
   onUploadFile: (file: File) => void;
@@ -50,7 +47,7 @@ const UserIconSelected = styled(UserIcon)`
   border: 1px solid #262626;
 `;
 
-export const PageFooter = ({ user, currentPath, onClickNavigation, onUploadFile }: Props) => {
+export const PageFooter = ({ avatar, currentPath, onClickNavigation, onUploadFile }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleClickHomeButton = useCallback(() => onClickNavigation('home'), [onClickNavigation]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
@@ -72,11 +69,7 @@ export const PageFooter = ({ user, currentPath, onClickNavigation, onUploadFile 
       </AddButtonWrapper>
       <UserButtonWrapper>
         <IconButton size="small" onClick={handleClickUserButton}>
-          {currentPath.startsWith(paths.profile) ? (
-            <UserIconSelected src={user.avatar} />
-          ) : (
-            <UserIcon src={user.avatar} />
-          )}
+          {currentPath.startsWith(paths.profile) ? <UserIconSelected src={avatar} /> : <UserIcon src={avatar} />}
         </IconButton>
       </UserButtonWrapper>
     </Footer>
