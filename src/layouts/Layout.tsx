@@ -1,9 +1,10 @@
 import React, { useCallback, ComponentProps, ReactNode } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useGetUsersAvatarQuery } from '../types/hasura';
+import { GetNewPostsDocument, useGetUsersAvatarQuery, useInsertPostMutation } from '../types/hasura';
 import { useAuth0 } from '../providers/Auth0';
-import { useNewPost } from '../providers/NewPost';
+import { useFileUpload } from '../providers/FileUpload';
 import { PageFooter } from '../components/PageFooter';
+import { LoadingScreen } from '../components/LoadingScreen';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { paths } from '../constants/paths';
 
@@ -14,16 +15,22 @@ type Props = {
 export const Layout = ({ children }: Props) => {
   const history = useHistory();
   const location = useLocation();
-  const { previewUrl, loadFile, resetUploadItem, submitPost } = useNewPost();
+  const { loading: uploadFileLoading, previewUrl, loadFile, submitFile, resetUploadItem } = useFileUpload();
+  const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const { user } = useAuth0();
   const { data: getUsersAvatarData } = useGetUsersAvatarQuery({ variables: { id: user.sub } });
   const handleSubmitNewPost = useCallback(
-    (caption: string) => {
+    async (caption: string) => {
+      const { data } = await submitFile();
+      if (!data?.uploadFile) return;
+      insertPost({
+        variables: { image: data.uploadFile, caption, userId: user.sub },
+        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: user.sub } }],
+      });
       resetUploadItem();
       history.push(paths.home);
-      submitPost(caption);
     },
-    [submitPost, resetUploadItem, history],
+    [submitFile, insertPost, resetUploadItem, user, history],
   );
   const handleClickPageFooterNavigation = useCallback<ComponentProps<typeof PageFooter>['onClickNavigation']>(
     action => {
@@ -41,7 +48,9 @@ export const Layout = ({ children }: Props) => {
     [history, user],
   );
 
-  return (
+  return uploadFileLoading || insertPostLoading ? (
+    <LoadingScreen />
+  ) : (
     <main>
       {children}
       <PageFooter

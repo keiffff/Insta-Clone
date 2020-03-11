@@ -3,7 +3,7 @@ import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useAuth0 } from '../providers/Auth0';
-import { useNewPost } from '../providers/NewPost';
+import { useFileUpload } from '../providers/FileUpload';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import {
@@ -62,7 +62,7 @@ const List = styled.ul`
 
 export const PostsIndex = () => {
   const { user: currentUser } = useAuth0();
-  const { loading: addNewPostLoading, loadFile } = useNewPost();
+  const { loading: uploadFileLoading, loadFile } = useFileUpload();
   const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
     variables: { userId: currentUser.sub },
   });
@@ -113,7 +113,7 @@ export const PostsIndex = () => {
         </ShareButtonWrapper>
       </Header>
       <Content>
-        {addNewPostLoading || getNewPostsLoading ? (
+        {uploadFileLoading || getNewPostsLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
