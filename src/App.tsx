@@ -6,7 +6,8 @@ import { NewPostProvider } from './providers/NewPost';
 import { auth0Config } from './constants/config';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PostsIndex } from './pages/PostsIndex';
-import { Profile } from './pages/Profile';
+import { ProfileEdit } from './pages/ProfileEdit';
+import { ProfileShow } from './pages/ProfileShow';
 import { Layout } from './layouts/Layout';
 import { paths } from './constants/paths';
 
@@ -18,8 +19,11 @@ const AuthenticatedPages = () => (
           <Route path={paths.home} exact>
             <PostsIndex />
           </Route>
-          <Route path={`${paths.profile}/:id`}>
-            <Profile />
+          <Route path={`${paths.profile}/:id`} exact>
+            <ProfileShow />
+          </Route>
+          <Route path={`${paths.profile}/:id/edit`}>
+            <ProfileEdit />
           </Route>
         </Switch>
       </Layout>

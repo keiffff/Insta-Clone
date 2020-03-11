@@ -147,7 +147,7 @@ const DrawerHandle = styled.span`
   border-radius: 4px;
 `;
 
-export const Profile = () => {
+export const ProfileShow = () => {
   const history = useHistory();
   const { id: userId } = useParams<{ id: string }>();
   const { user: currentUser, logout } = useAuth0();
@@ -178,6 +178,7 @@ export const Profile = () => {
   const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleClickLogout = useCallback(() => logout({ returnTo: window.location.origin }), [logout]);
+  const handleClickMoveToEdit = useCallback(() => history.push(`${paths.profile}/${userId}/edit`), [history, userId]);
   const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
   const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
 
@@ -222,7 +223,9 @@ export const Profile = () => {
                 </Summary>
               </UsersInfo>
               {viewingSelf ? (
-                <EditProfileButton variant="outlined">プロフィールを編集</EditProfileButton>
+                <EditProfileButton variant="outlined" onClick={handleClickMoveToEdit}>
+                  プロフィールを編集
+                </EditProfileButton>
               ) : getFollowInfoData?.follow.length ? (
                 <FollowButton variant="outlined" onClick={handleDeleteFollow}>
                   フォローをやめる

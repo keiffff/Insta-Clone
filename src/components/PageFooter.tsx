@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { IconButton } from '@material-ui/core';
-import { AddBoxOutlined, Home, HomeOutlined } from '@material-ui/icons';
+import { AccountCircle, AddBoxOutlined, Home, HomeOutlined } from '@material-ui/icons';
 import styled from 'styled-components';
 import { Uploader } from './Uploader';
 import { paths } from '../constants/paths';
@@ -69,7 +69,15 @@ export const PageFooter = ({ avatar, currentPath, onClickNavigation, onUploadFil
       </AddButtonWrapper>
       <UserButtonWrapper>
         <IconButton size="small" onClick={handleClickUserButton}>
-          {currentPath.startsWith(paths.profile) ? <UserIconSelected src={avatar} /> : <UserIcon src={avatar} />}
+          {avatar ? (
+            currentPath.startsWith(paths.profile) ? (
+              <UserIconSelected src={avatar} />
+            ) : (
+              <UserIcon src={avatar} />
+            )
+          ) : (
+            <AccountCircle />
+          )}
         </IconButton>
       </UserButtonWrapper>
     </Footer>

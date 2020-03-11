@@ -25,3 +25,13 @@ export const GET_USERS_AVATAR = gql`
     }
   }
 `;
+
+export const GET_USERS_EDITABLE_INFO = gql`
+  query getUsersEditableInfo($id: String!) {
+    users(where: { id: { _eq: $id } }) {
+      name
+      avatar
+      description
+    }
+  }
+`;
