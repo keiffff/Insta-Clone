@@ -1,14 +1,16 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Button, IconButton } from '@material-ui/core';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useGetUsersEditableInfoQuery } from '../types/hasura';
+import { useUploadFileMutation } from '../types/fileUpload';
 import { Uploader } from '../components/Uploader';
+import { paths } from '../constants/paths';
 
 const Screen = styled.div`
   width: 100%;
   height: 100%;
-  z-index: 1200;
+  z-index: 1300;
   position: fixed;
   top: 0;
   left: 0;
@@ -115,15 +117,39 @@ const TextField = styled.input`
 `;
 
 export const ProfileEdit = () => {
+  const history = useHistory();
   const { id: userId } = useParams<{ id: string }>();
   const { data: getUsersEditableInfoData } = useGetUsersEditableInfoQuery({ variables: { id: userId } });
+  const [uploadFile] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
+  const [avatar, setAvatar] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const handleClickCancelButton = useCallback(() => history.replace(`${paths.profile}/${userId}`), [history, userId]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleUploadFile = useCallback(
+    (fileArg: File) => {
+      setFile(fileArg);
+      const reader = new FileReader();
+      reader.readAsDataURL(fileArg);
+      reader.onload = () => setAvatar(reader.result as string);
+      uploadFile({ variables: { file } });
+    },
+    [uploadFile, file],
+  );
+  useEffect(() => {
+    if (!getUsersEditableInfoData) return;
+    const userInfo = getUsersEditableInfoData.users[0];
+    setAvatar(userInfo.avatar);
+    setName(userInfo.name);
+    setDescription(userInfo.description ?? '');
+  }, [getUsersEditableInfoData]);
 
   return (
     <Screen>
       <Header>
-        <CancelButton>キャンセル</CancelButton>
+        <CancelButton onClick={handleClickCancelButton}>キャンセル</CancelButton>
         <Title>プロフィールを編集</Title>
         <SubmitButton>完了</SubmitButton>
       </Header>
@@ -131,11 +157,11 @@ export const ProfileEdit = () => {
         <EditAvatar>
           <AvatarWrapper>
             <IconButton onClick={handleClickUploadButton}>
-              <Avatar src={getUsersEditableInfoData?.users[0].avatar} />
+              <Avatar src={avatar} />
             </IconButton>
           </AvatarWrapper>
           <EditAvatarButtonWrapper>
-            <Uploader ref={fileInputRef} onUpload={console.log}>
+            <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
               <EditAvatarButton onClick={handleClickUploadButton}>プロフィール写真を変更</EditAvatarButton>
             </Uploader>
           </EditAvatarButtonWrapper>
@@ -144,11 +170,11 @@ export const ProfileEdit = () => {
           <EditList>
             <dt>名前</dt>
             <dd>
-              <TextField type="text" />
+              <TextField type="text" value={name} onChange={() => {}} />
             </dd>
             <dt>自己紹介</dt>
             <dd>
-              <TextField type="text" placeholder="自己紹介" />
+              <TextField type="text" placeholder="自己紹介" value={description} onChange={() => {}} />
             </dd>
           </EditList>
         </EditForm>

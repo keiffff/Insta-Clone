@@ -1,8 +1,8 @@
-import React, { useCallback, ComponentProps, ReactNode } from 'react';
+import React, { useCallback, useState, ComponentProps, ReactNode } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { GetNewPostsDocument, useGetUsersAvatarQuery, useInsertPostMutation } from '../types/hasura';
+import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
-import { useFileUpload } from '../providers/FileUpload';
 import { PageFooter } from '../components/PageFooter';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { NewPostScreen } from '../components/NewPostScreen';
@@ -15,23 +15,38 @@ type Props = {
 export const Layout = ({ children }: Props) => {
   const history = useHistory();
   const location = useLocation();
-  const { loading: uploadFileLoading, previewUrl, loadFile, submitFile, resetUploadItem } = useFileUpload();
+  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
+  const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
+  const [file, setFile] = useState<File>();
+  const [previewUrl, setPreviewUrl] = useState('');
+  const handleUploadFile = useCallback((fileArg: File) => {
+    setFile(fileArg);
+    setNewPostScreenVisible(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(fileArg);
+    reader.onload = () => setPreviewUrl(reader.result as string);
+  }, []);
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const { user } = useAuth0();
   const { data: getUsersAvatarData } = useGetUsersAvatarQuery({ variables: { id: user.sub } });
   const handleSubmitNewPost = useCallback(
     async (caption: string) => {
-      const { data } = await submitFile();
+      const { data } = await uploadFile({ variables: { file } });
       if (!data?.uploadFile) return;
       insertPost({
         variables: { image: data.uploadFile, caption, userId: user.sub },
         refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: user.sub } }],
       });
-      resetUploadItem();
+      setPreviewUrl('');
+      setNewPostScreenVisible(false);
       history.push(paths.home);
     },
-    [submitFile, insertPost, resetUploadItem, user, history],
+    [insertPost, file, uploadFile, user, history],
   );
+  const handleCloseNewPostScreen = useCallback(() => {
+    setPreviewUrl('');
+    setNewPostScreenVisible(false);
+  }, []);
   const handleClickPageFooterNavigation = useCallback<ComponentProps<typeof PageFooter>['onClickNavigation']>(
     action => {
       switch (action) {
@@ -57,10 +72,10 @@ export const Layout = ({ children }: Props) => {
         avatar={getUsersAvatarData?.users[0].avatar || ''}
         currentPath={location.pathname}
         onClickNavigation={handleClickPageFooterNavigation}
-        onUploadFile={loadFile}
+        onUploadFile={handleUploadFile}
       />
-      {previewUrl ? (
-        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={resetUploadItem} />
+      {newPostScreenVisible ? (
+        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
       ) : null}
     </main>
   );

@@ -1,17 +1,21 @@
-import React, { useCallback, useRef, ComponentProps } from 'react';
+import React, { useCallback, useState, useRef, ComponentProps } from 'react';
 import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
-import { useFileUpload } from '../providers/FileUpload';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
+import { NewPostScreen } from '../components/NewPostScreen';
 import {
   GetNewPostsDocument,
   useDeleteLikeMutation,
   useGetNewPostsQuery,
   useInsertLikeMutation,
+  useInsertPostMutation,
 } from '../types/hasura';
+import { useUploadFileMutation } from '../types/fileUpload';
+import { paths } from '../constants/paths';
 
 const Content = styled.section`
   padding: 48px 0px 56px;
@@ -61,15 +65,45 @@ const List = styled.ul`
 `;
 
 export const PostsIndex = () => {
+  const history = useHistory();
   const { user: currentUser } = useAuth0();
-  const { loading: uploadFileLoading, loadFile } = useFileUpload();
+  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
+  const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
+  const [file, setFile] = useState<File>();
+  const [previewUrl, setPreviewUrl] = useState('');
+  const handleUploadFile = useCallback((fileArg: File) => {
+    setFile(fileArg);
+    setNewPostScreenVisible(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(fileArg);
+    reader.onload = () => setPreviewUrl(reader.result as string);
+  }, []);
   const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
     variables: { userId: currentUser.sub },
   });
   const [insertLike] = useInsertLikeMutation();
   const [deleteLike] = useDeleteLikeMutation();
+  const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleSubmitNewPost = useCallback(
+    async (caption: string) => {
+      setNewPostScreenVisible(false);
+      const { data } = await uploadFile({ variables: { file } });
+      if (!data?.uploadFile) return;
+      insertPost({
+        variables: { image: data.uploadFile, caption, userId: currentUser.sub },
+        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
+      });
+      setPreviewUrl('');
+      history.push(paths.home);
+    },
+    [insertPost, file, uploadFile, currentUser, history],
+  );
+  const handleCloseNewPostScreen = useCallback(() => {
+    setPreviewUrl('');
+    setNewPostScreenVisible(false);
+  }, []);
   const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
   const handleClickPostItem = useCallback<ComponentProps<typeof PostItem>['onClick']>(
     (action, postId) => {
@@ -95,7 +129,7 @@ export const PostsIndex = () => {
     <>
       <Header>
         <UploadButtonWrapper>
-          <Uploader ref={fileInputRef} onUpload={loadFile} capture="environment">
+          <Uploader ref={fileInputRef} onUpload={handleUploadFile} capture="environment">
             <IconButton size="small" onClick={handleClickUploadButton}>
               <CameraAltOutlined />
             </IconButton>
@@ -113,7 +147,7 @@ export const PostsIndex = () => {
         </ShareButtonWrapper>
       </Header>
       <Content>
-        {uploadFileLoading || getNewPostsLoading ? (
+        {getNewPostsLoading || uploadFileLoading || insertPostLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
@@ -134,6 +168,9 @@ export const PostsIndex = () => {
           </List>
         )}
       </Content>
+      {newPostScreenVisible ? (
+        <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
+      ) : null}
     </>
   );
 };
