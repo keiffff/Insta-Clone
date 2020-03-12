@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { Button, IconButton } from '@material-ui/core';
+import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router-dom';
 import { useGetUsersEditableInfoQuery } from '../types/hasura';
@@ -88,7 +88,7 @@ const EditAvatarButton = styled(Button)`
 
 const EditForm = styled.form`
   width: 100%;
-  padding: 8px 0px 8px;
+  padding: 16px 0px;
 `;
 
 const EditList = styled.dl`
@@ -119,7 +119,9 @@ const TextField = styled.input`
 export const ProfileEdit = () => {
   const history = useHistory();
   const { id: userId } = useParams<{ id: string }>();
-  const { data: getUsersEditableInfoData } = useGetUsersEditableInfoQuery({ variables: { id: userId } });
+  const { loading: getUsersEditableInfoLoading, data: getUsersEditableInfoData } = useGetUsersEditableInfoQuery({
+    variables: { id: userId },
+  });
   const [uploadFile] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
@@ -156,8 +158,8 @@ export const ProfileEdit = () => {
       <UserInfo>
         <EditAvatar>
           <AvatarWrapper>
-            <IconButton onClick={handleClickUploadButton}>
-              <Avatar src={avatar} />
+            <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
+              {getUsersEditableInfoLoading ? <CircularProgress size={30} /> : <Avatar src={avatar} />}
             </IconButton>
           </AvatarWrapper>
           <EditAvatarButtonWrapper>
