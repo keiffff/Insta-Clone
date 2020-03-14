@@ -8,9 +8,8 @@ import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
 import {
-  GetNewPostsDocument,
+  useNotifyNewPostsSubscription,
   useDeleteLikeMutation,
-  useGetNewPostsQuery,
   useInsertLikeMutation,
   useInsertPostMutation,
 } from '../types/hasura';
@@ -78,7 +77,7 @@ export const PostsIndex = () => {
     reader.readAsDataURL(fileArg);
     reader.onload = () => setPreviewUrl(reader.result as string);
   }, []);
-  const { loading: getNewPostsLoading, data: getNewPostsData } = useGetNewPostsQuery({
+  const { loading: notifyNewPostsLoading, data: notifyNewPostsData } = useNotifyNewPostsSubscription({
     variables: { userId: currentUser.sub },
   });
   const [insertLike] = useInsertLikeMutation();
@@ -93,7 +92,6 @@ export const PostsIndex = () => {
       if (!data?.uploadFile) return;
       insertPost({
         variables: { image: data.uploadFile, caption, userId: currentUser.sub },
-        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
       });
       setPreviewUrl('');
       history.push(paths.home);
@@ -109,7 +107,6 @@ export const PostsIndex = () => {
     (action, postId) => {
       const likeOptions = {
         variables: { postId, userId: currentUser.sub },
-        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: currentUser.sub } }],
       };
       switch (action) {
         case 'like':
@@ -147,13 +144,13 @@ export const PostsIndex = () => {
         </ShareButtonWrapper>
       </Header>
       <Content>
-        {getNewPostsLoading || uploadFileLoading || insertPostLoading ? (
+        {notifyNewPostsLoading || uploadFileLoading || insertPostLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
         ) : (
           <List>
-            {getNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
+            {notifyNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
               <li key={id}>
                 <PostItem
                   id={id}

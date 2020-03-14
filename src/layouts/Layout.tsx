@@ -1,6 +1,6 @@
 import React, { useCallback, useState, ComponentProps, ReactNode } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { GetNewPostsDocument, useGetUsersAvatarQuery, useInsertPostMutation } from '../types/hasura';
+import { useGetUsersAvatarQuery, useInsertPostMutation } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { useAuth0 } from '../providers/Auth0';
 import { PageFooter } from '../components/PageFooter';
@@ -35,7 +35,6 @@ export const Layout = ({ children }: Props) => {
       if (!data?.uploadFile) return;
       insertPost({
         variables: { image: data.uploadFile, caption, userId: user.sub },
-        refetchQueries: [{ query: GetNewPostsDocument, variables: { userId: user.sub } }],
       });
       setPreviewUrl('');
       setNewPostScreenVisible(false);
