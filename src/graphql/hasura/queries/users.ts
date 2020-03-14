@@ -5,6 +5,7 @@ export const GET_USERS_INFO = gql`
     users(where: { id: { _eq: $id } }) {
       name
       avatar
+      description
       posts(order_by: { created_at: desc }) {
         id
         image

@@ -56,7 +56,7 @@ const UsersProfile = styled.div`
   border-bottom: 1px solid #dbdbdb;
 `;
 
-const UsersInfo = styled.div`
+const AvatarAndSummaryRow = styled.div`
   width: 100%;
   display: flex;
   margin-bottom: 16px;
@@ -73,6 +73,15 @@ const Summary = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const DescriptionRow = styled.div`
+  margin-bottom: 16px;
+`;
+
+const Description = styled.p`
+  margin: 0;
+  font-size: 14px;
 `;
 
 const Cell = styled.div`
@@ -205,7 +214,7 @@ export const ProfileShow = () => {
         ) : (
           <div>
             <UsersProfile>
-              <UsersInfo>
+              <AvatarAndSummaryRow>
                 <Avatar src={getUsersInfoData?.users[0].avatar} />
                 <Summary>
                   <Cell>
@@ -221,7 +230,10 @@ export const ProfileShow = () => {
                     <CellLabel>フォロー中</CellLabel>
                   </Cell>
                 </Summary>
-              </UsersInfo>
+              </AvatarAndSummaryRow>
+              <DescriptionRow>
+                <Description>{getUsersInfoData?.users[0].description || ''}</Description>
+              </DescriptionRow>
               {viewingSelf ? (
                 <EditProfileButton variant="outlined" onClick={handleClickMoveToEdit}>
                   プロフィールを編集
