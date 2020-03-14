@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef, ChangeEventHandler } from 'react';
-import { Button, CircularProgress, IconButton } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, Slide } from '@material-ui/core';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router-dom';
 import { useGetUsersEditableInfoQuery, useUpdateUserMutation } from '../types/hasura';
@@ -172,51 +172,53 @@ export const ProfileEdit = () => {
   }, [getUsersEditableInfoData]);
 
   return (
-    <Screen>
-      <Header>
-        <CancelButton onClick={handleClickCancelButton}>キャンセル</CancelButton>
-        <Title>プロフィールを編集</Title>
-        <SubmitButton onClick={handleSubmitAttributes}>完了</SubmitButton>
-      </Header>
-      <UserInfo>
-        {getUsersEditableInfoLoading || updateUserLoading || uploadFileLoading ? (
-          <CircularProgressWrapper>
-            <CircularProgress size={30} />
-          </CircularProgressWrapper>
-        ) : (
-          <>
-            <EditAvatar>
-              <AvatarWrapper>
-                <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
-                  <Avatar src={attributes.avatar} />
-                </IconButton>
-              </AvatarWrapper>
-              <EditAvatarButtonWrapper>
-                <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
-                  <EditAvatarButton onClick={handleClickUploadButton}>プロフィール写真を変更</EditAvatarButton>
-                </Uploader>
-              </EditAvatarButtonWrapper>
-            </EditAvatar>
-            <EditForm>
-              <EditList>
-                <dt>名前</dt>
-                <dd>
-                  <TextField type="text" value={attributes.name} onChange={handleChangeName} />
-                </dd>
-                <dt>自己紹介</dt>
-                <dd>
-                  <TextField
-                    type="text"
-                    placeholder="自己紹介"
-                    value={attributes.description}
-                    onChange={handleChangeDescription}
-                  />
-                </dd>
-              </EditList>
-            </EditForm>
-          </>
-        )}
-      </UserInfo>
-    </Screen>
+    <Slide mountOnEnter unmountOnExit in direction="up">
+      <Screen>
+        <Header>
+          <CancelButton onClick={handleClickCancelButton}>キャンセル</CancelButton>
+          <Title>プロフィールを編集</Title>
+          <SubmitButton onClick={handleSubmitAttributes}>完了</SubmitButton>
+        </Header>
+        <UserInfo>
+          {getUsersEditableInfoLoading || updateUserLoading || uploadFileLoading ? (
+            <CircularProgressWrapper>
+              <CircularProgress size={30} />
+            </CircularProgressWrapper>
+          ) : (
+            <>
+              <EditAvatar>
+                <AvatarWrapper>
+                  <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
+                    <Avatar src={attributes.avatar} />
+                  </IconButton>
+                </AvatarWrapper>
+                <EditAvatarButtonWrapper>
+                  <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
+                    <EditAvatarButton onClick={handleClickUploadButton}>プロフィール写真を変更</EditAvatarButton>
+                  </Uploader>
+                </EditAvatarButtonWrapper>
+              </EditAvatar>
+              <EditForm>
+                <EditList>
+                  <dt>名前</dt>
+                  <dd>
+                    <TextField type="text" value={attributes.name} onChange={handleChangeName} />
+                  </dd>
+                  <dt>自己紹介</dt>
+                  <dd>
+                    <TextField
+                      type="text"
+                      placeholder="自己紹介"
+                      value={attributes.description}
+                      onChange={handleChangeDescription}
+                    />
+                  </dd>
+                </EditList>
+              </EditForm>
+            </>
+          )}
+        </UserInfo>
+      </Screen>
+    </Slide>
   );
 };
