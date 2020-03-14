@@ -16,6 +16,58 @@ type Props = {
 
 const wsUri = gqlEndpoints.hasura.replace(/^https?/, 'wss');
 
+function createLinks(token?: string) {
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const wsLink = new WebSocketLink({
+    uri: wsUri,
+    options: {
+      reconnect: true,
+      connectionParams: {
+        headers: {
+          ...authHeader,
+        },
+      },
+    },
+  });
+  const httpLink = new HttpLink({
+    uri: gqlEndpoints.hasura,
+    headers: {
+      ...authHeader,
+    },
+  });
+  const uploadLink = createUploadLink({
+    uri: gqlEndpoints.fileUpload,
+    headers: {
+      'keep-alive': 'true',
+    },
+  });
+  const uploadOrHttpLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+
+      return (
+        (definition.kind === 'OperationDefinition' &&
+          definition.operation === 'mutation' &&
+          definition.name?.value === 'uploadFile') ||
+        false
+      );
+    },
+    uploadLink,
+    httpLink,
+  );
+  const terminatingLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+    },
+    wsLink,
+    uploadOrHttpLink,
+  );
+
+  return terminatingLink;
+}
+
 const inMemoryCache = new InMemoryCache();
 
 export const ApolloProvider = ({ children }: Props) => {
@@ -24,54 +76,8 @@ export const ApolloProvider = ({ children }: Props) => {
   useEffect(() => {
     const initApollo = async () => {
       const token = await getTokenSilently();
-      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-      const wsLink = new WebSocketLink({
-        uri: wsUri,
-        options: {
-          reconnect: true,
-          connectionParams: {
-            headers: {
-              ...authHeader,
-            },
-          },
-        },
-      });
-      const httpLink = new HttpLink({
-        uri: gqlEndpoints.hasura,
-        headers: {
-          ...authHeader,
-        },
-      });
-      const uploadLink = createUploadLink({
-        uri: gqlEndpoints.fileUpload,
-        headers: {
-          'keep-alive': 'true',
-        },
-      });
-      const uploadOrHttpLink = split(
-        ({ query }) => {
-          const definition = getMainDefinition(query);
-
-          return (
-            (definition.kind === 'OperationDefinition' &&
-              definition.operation === 'mutation' &&
-              definition.name?.value === 'uploadFile') ||
-            false
-          );
-        },
-        uploadLink,
-        httpLink,
-      );
-      const terminatingLink = split(
-        ({ query }) => {
-          const definition = getMainDefinition(query);
-
-          return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
-        },
-        wsLink,
-        uploadOrHttpLink,
-      );
-      setClient(new ApolloClient({ link: terminatingLink, cache: inMemoryCache }));
+      const link = createLinks(token);
+      setClient(new ApolloClient({ link, cache: inMemoryCache }));
     };
     initApollo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
