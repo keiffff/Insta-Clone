@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef, ChangeEventHandler, FormEvent } from 'react';
+import React, { useCallback, useEffect, useState, useRef, ChangeEventHandler } from 'react';
 import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router-dom';
@@ -156,19 +156,15 @@ export const ProfileEdit = () => {
     e.persist();
     setAttributes(state => ({ ...state, description: e.target.value }));
   }, []);
-  const handleSubmitAttributes = useCallback(
-    async (e?: FormEvent) => {
-      let url = '';
-      if (e) e.preventDefault();
-      if (file) {
-        const { data } = await uploadFile({ variables: { file } });
-        url = data?.uploadFile || '';
-      }
-      await updateUser({ variables: { id: userId, attributes: { ...attributes, ...(url ? { avatar: url } : {}) } } });
-      history.replace(`${paths.profile}/${userId}`);
-    },
-    [updateUser, userId, attributes, history, file, uploadFile],
-  );
+  const handleSubmitAttributes = useCallback(async () => {
+    let url = '';
+    if (file) {
+      const { data } = await uploadFile({ variables: { file } });
+      url = data?.uploadFile || '';
+    }
+    await updateUser({ variables: { id: userId, attributes: { ...attributes, ...(url ? { avatar: url } : {}) } } });
+    history.replace(`${paths.profile}/${userId}`);
+  }, [updateUser, userId, attributes, history, file, uploadFile]);
   useEffect(() => {
     if (!getUsersEditableInfoData) return;
     const { avatar, name, description } = getUsersEditableInfoData.users[0] ?? initialAttributes;
@@ -201,7 +197,7 @@ export const ProfileEdit = () => {
                 </Uploader>
               </EditAvatarButtonWrapper>
             </EditAvatar>
-            <EditForm onSubmit={handleSubmitAttributes}>
+            <EditForm>
               <EditList>
                 <dt>名前</dt>
                 <dd>
