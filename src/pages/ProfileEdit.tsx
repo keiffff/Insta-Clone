@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, ChangeEventHandler, FormEvent } from 'react';
 import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router-dom';
-import { useGetUsersEditableInfoQuery } from '../types/hasura';
+import { useGetUsersEditableInfoQuery, useUpdateUserMutation } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { Uploader } from '../components/Uploader';
 import { paths } from '../constants/paths';
@@ -50,6 +50,12 @@ const SubmitButton = styled(Button)`
     color: #3797f7;
     font-weight: bold;
   }
+`;
+
+const CircularProgressWrapper = styled.div`
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
 `;
 
 const UserInfo = styled.div`
@@ -113,8 +119,15 @@ const TextField = styled.input`
   display: inline-flex;
   font-size: 16px;
   font-weight: bold;
+  border: none;
   outline: 0;
 `;
+
+const initialAttributes = {
+  avatar: '',
+  name: '',
+  description: '',
+};
 
 export const ProfileEdit = () => {
   const history = useHistory();
@@ -122,30 +135,44 @@ export const ProfileEdit = () => {
   const { loading: getUsersEditableInfoLoading, data: getUsersEditableInfoData } = useGetUsersEditableInfoQuery({
     variables: { id: userId },
   });
-  const [uploadFile] = useUploadFileMutation();
+  const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
+  const [updateUser, { loading: updateUserLoading }] = useUpdateUserMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
-  const [avatar, setAvatar] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [attributes, setAttributes] = useState(initialAttributes);
   const handleClickCancelButton = useCallback(() => history.replace(`${paths.profile}/${userId}`), [history, userId]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
-  const handleUploadFile = useCallback(
-    (fileArg: File) => {
-      setFile(fileArg);
-      const reader = new FileReader();
-      reader.readAsDataURL(fileArg);
-      reader.onload = () => setAvatar(reader.result as string);
-      uploadFile({ variables: { file } });
+  const handleUploadFile = useCallback((fileArg: File) => {
+    setFile(fileArg);
+    const reader = new FileReader();
+    reader.readAsDataURL(fileArg);
+    reader.onload = () => setAttributes(state => ({ ...state, avatar: reader.result as string }));
+  }, []);
+  const handleChangeName = useCallback<ChangeEventHandler<HTMLInputElement>>(e => {
+    e.persist();
+    setAttributes(state => ({ ...state, name: e.target.value }));
+  }, []);
+  const handleChangeDescription = useCallback<ChangeEventHandler<HTMLInputElement>>(e => {
+    e.persist();
+    setAttributes(state => ({ ...state, description: e.target.value }));
+  }, []);
+  const handleSubmitAttributes = useCallback(
+    async (e?: FormEvent) => {
+      let url = '';
+      if (e) e.preventDefault();
+      if (file) {
+        const { data } = await uploadFile({ variables: { file } });
+        url = data?.uploadFile || '';
+      }
+      await updateUser({ variables: { id: userId, attributes: { ...attributes, ...(url ? { avatar: url } : {}) } } });
+      history.replace(`${paths.profile}/${userId}`);
     },
-    [uploadFile, file],
+    [updateUser, userId, attributes, history, file, uploadFile],
   );
   useEffect(() => {
     if (!getUsersEditableInfoData) return;
-    const userInfo = getUsersEditableInfoData.users[0];
-    setAvatar(userInfo.avatar);
-    setName(userInfo.name);
-    setDescription(userInfo.description ?? '');
+    const { avatar, name, description } = getUsersEditableInfoData.users[0] ?? initialAttributes;
+    setAttributes(state => ({ ...state, avatar, name, description: description ?? '' }));
   }, [getUsersEditableInfoData]);
 
   return (
@@ -153,33 +180,46 @@ export const ProfileEdit = () => {
       <Header>
         <CancelButton onClick={handleClickCancelButton}>キャンセル</CancelButton>
         <Title>プロフィールを編集</Title>
-        <SubmitButton>完了</SubmitButton>
+        <SubmitButton onClick={handleSubmitAttributes}>完了</SubmitButton>
       </Header>
       <UserInfo>
-        <EditAvatar>
-          <AvatarWrapper>
-            <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
-              {getUsersEditableInfoLoading ? <CircularProgress size={30} /> : <Avatar src={avatar} />}
-            </IconButton>
-          </AvatarWrapper>
-          <EditAvatarButtonWrapper>
-            <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
-              <EditAvatarButton onClick={handleClickUploadButton}>プロフィール写真を変更</EditAvatarButton>
-            </Uploader>
-          </EditAvatarButtonWrapper>
-        </EditAvatar>
-        <EditForm>
-          <EditList>
-            <dt>名前</dt>
-            <dd>
-              <TextField type="text" value={name} onChange={() => {}} />
-            </dd>
-            <dt>自己紹介</dt>
-            <dd>
-              <TextField type="text" placeholder="自己紹介" value={description} onChange={() => {}} />
-            </dd>
-          </EditList>
-        </EditForm>
+        {getUsersEditableInfoLoading || updateUserLoading || uploadFileLoading ? (
+          <CircularProgressWrapper>
+            <CircularProgress size={30} />
+          </CircularProgressWrapper>
+        ) : (
+          <>
+            <EditAvatar>
+              <AvatarWrapper>
+                <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
+                  <Avatar src={attributes.avatar} />
+                </IconButton>
+              </AvatarWrapper>
+              <EditAvatarButtonWrapper>
+                <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
+                  <EditAvatarButton onClick={handleClickUploadButton}>プロフィール写真を変更</EditAvatarButton>
+                </Uploader>
+              </EditAvatarButtonWrapper>
+            </EditAvatar>
+            <EditForm onSubmit={handleSubmitAttributes}>
+              <EditList>
+                <dt>名前</dt>
+                <dd>
+                  <TextField type="text" value={attributes.name} onChange={handleChangeName} />
+                </dd>
+                <dt>自己紹介</dt>
+                <dd>
+                  <TextField
+                    type="text"
+                    placeholder="自己紹介"
+                    value={attributes.description}
+                    onChange={handleChangeDescription}
+                  />
+                </dd>
+              </EditList>
+            </EditForm>
+          </>
+        )}
       </UserInfo>
     </Screen>
   );
