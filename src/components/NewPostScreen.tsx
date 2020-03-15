@@ -48,7 +48,7 @@ const SubmitButton = styled(Button)`
 
 const Container = styled.div`
   width: 100%;
-  height: 20%;
+  height: 25%;
   display: flex;
   align-items: center;
   padding: 8px;

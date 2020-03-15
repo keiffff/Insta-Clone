@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, ComponentProps } from 'react';
-import { Button, CircularProgress, IconButton } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { NewPostScreen } from '../components/NewPostScreen';
 import {
   useNotifyNewPostsSubscription,
   useDeleteLikeMutation,
+  useDeletePostMutation,
   useInsertLikeMutation,
   useInsertPostMutation,
 } from '../types/hasura';
@@ -56,20 +57,49 @@ const CircularProgressWrapper = styled.div`
   padding: 8px 0;
 `;
 
-const List = styled.ul`
+const PostsList = styled.ul`
   width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
 `;
 
+const Drawer = styled(SwipeableDrawer)`
+  .MuiPaper-root {
+    background: transparent;
+  }
+  .MuiDrawer-paper {
+    width: 90%;
+    margin: 0 auto 16px;
+  }
+`;
+
+const MenuList = styled(List)`
+  background: #ffffff;
+  border-radius: 5px;
+`;
+
+const MenuItem = styled(ListItem)`
+  &.MuiListItem-root {
+    justify-content: center;
+  }
+  & + & {
+    border-top: 1px solid #dbdbdb;
+  }
+`;
+
 export const PostsIndex = () => {
   const history = useHistory();
   const { user: currentUser } = useAuth0();
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
+  const [deletePost] = useDeletePostMutation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState(-1);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState('');
+  const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
+  const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleUploadFile = useCallback((fileArg: File) => {
     setFile(fileArg);
     setNewPostScreenVisible(true);
@@ -85,6 +115,10 @@ export const PostsIndex = () => {
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleDeletePost = useCallback(() => {
+    deletePost({ variables: { id: selectedPostId } });
+    setDrawerOpen(false);
+  }, [deletePost, selectedPostId]);
   const handleSubmitNewPost = useCallback(
     async (caption: string) => {
       setNewPostScreenVisible(false);
@@ -109,6 +143,10 @@ export const PostsIndex = () => {
         variables: { postId, userId: currentUser.sub },
       };
       switch (action) {
+        case 'openMenu':
+          setDrawerOpen(true);
+          setSelectedPostId(postId);
+          break;
         case 'like':
           insertLike(likeOptions);
           break;
@@ -149,7 +187,7 @@ export const PostsIndex = () => {
             <CircularProgress size={30} />
           </CircularProgressWrapper>
         ) : (
-          <List>
+          <PostsList>
             {notifyNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
               <li key={id}>
                 <PostItem
@@ -162,9 +200,19 @@ export const PostsIndex = () => {
                 />
               </li>
             )) || null}
-          </List>
+          </PostsList>
         )}
       </Content>
+      <Drawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
+        <MenuList>
+          <MenuItem button onClick={handleDeletePost}>
+            削除
+          </MenuItem>
+          <MenuItem button onClick={handleCloseDrawer}>
+            キャンセル
+          </MenuItem>
+        </MenuList>
+      </Drawer>
       {newPostScreenVisible ? (
         <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
       ) : null}

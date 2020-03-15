@@ -5,12 +5,16 @@ export const INSERT_POST = gql`
     insert_posts(objects: { image: $image, caption: $caption, user_id: $userId }) {
       returning {
         id
-        image
-        caption
-        user {
-          avatar
-          name
-        }
+      }
+    }
+  }
+`;
+
+export const DELETE_POST = gql`
+  mutation deletePost($id: Int!) {
+    delete_posts(where: { id: { _eq: $id } }) {
+      returning {
+        id
       }
     }
   }

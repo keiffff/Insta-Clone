@@ -30,7 +30,7 @@ type Props = {
     avatar: string;
     name: string;
   };
-  onClick: (action: 'like' | 'unlike', postId: number) => void;
+  onClick: (action: 'openMenu' | 'like' | 'unlike', postId: number) => void;
 };
 
 const Card = styled(CardOrigin)`
@@ -95,6 +95,7 @@ const CardContent = styled(CardContentOrigin)`
 
 export const PostItem = ({ id, image, caption, liked = false, user, onClick }: Props) => {
   const [like, setLike] = useState(false);
+  const handleClickLeader = useCallback(() => onClick('openMenu', id), [onClick, id]);
   const handleClickLike = useCallback(() => {
     setLike(v => !v);
     onClick(liked ? 'unlike' : 'like', id);
@@ -109,7 +110,7 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
       <CardHeader
         avatar={<Avatar src={user.avatar} />}
         action={
-          <IconButton size="small">
+          <IconButton size="small" onClick={handleClickLeader}>
             <MoreHoriz />
           </IconButton>
         }
