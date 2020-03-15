@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useRef, ComponentProps } from 'react';
-import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
+import React, { useCallback, useState, useRef, useMemo, ComponentProps } from 'react';
+import { Button, CircularProgress, IconButton, SwipeableDrawer } from '@material-ui/core';
 import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -7,9 +7,11 @@ import { useAuth0 } from '../providers/Auth0';
 import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
+import { MenuList } from '../components/MenuList';
 import {
   useNotifyNewPostsSubscription,
   useDeleteLikeMutation,
+  useDeleteFollowMutation,
   useDeletePostMutation,
   useInsertLikeMutation,
   useInsertPostMutation,
@@ -74,20 +76,6 @@ const Drawer = styled(SwipeableDrawer)`
   }
 `;
 
-const MenuList = styled(List)`
-  background: #ffffff;
-  border-radius: 5px;
-`;
-
-const MenuItem = styled(ListItem)`
-  &.MuiListItem-root {
-    justify-content: center;
-  }
-  & + & {
-    border-top: 1px solid #dbdbdb;
-  }
-`;
-
 export const PostsIndex = () => {
   const history = useHistory();
   const { user: currentUser } = useAuth0();
@@ -112,9 +100,19 @@ export const PostsIndex = () => {
   });
   const [insertLike] = useInsertLikeMutation();
   const [deleteLike] = useDeleteLikeMutation();
+  const [deleteFollow] = useDeleteFollowMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const targetUserId = useMemo(() => notifyNewPostsData?.posts.find(({ id }) => id === selectedPostId)?.user.id, [
+    notifyNewPostsData,
+    selectedPostId,
+  ]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
+  const handleDeleteFollow = useCallback(() => {
+    if (!targetUserId) return;
+    deleteFollow({ variables: { followingId: currentUser.sub, followerId: targetUserId } });
+    setDrawerOpen(false);
+  }, [currentUser, deleteFollow, targetUserId]);
   const handleDeletePost = useCallback(() => {
     deletePost({ variables: { id: selectedPostId } });
     setDrawerOpen(false);
@@ -158,6 +156,15 @@ export const PostsIndex = () => {
       }
     },
     [insertLike, deleteLike, currentUser],
+  );
+  const menus = useMemo<ComponentProps<typeof MenuList>['menus']>(
+    () => [
+      targetUserId === currentUser.sub
+        ? { label: '削除', dangerous: true, onClick: handleDeletePost }
+        : { label: 'フォローをやめる', dangerous: true, onClick: handleDeleteFollow },
+      { label: 'キャンセル', onClick: handleCloseDrawer },
+    ],
+    [targetUserId, currentUser, handleCloseDrawer, handleDeleteFollow, handleDeletePost],
   );
 
   return (
@@ -204,14 +211,7 @@ export const PostsIndex = () => {
         )}
       </Content>
       <Drawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
-        <MenuList>
-          <MenuItem button onClick={handleDeletePost}>
-            削除
-          </MenuItem>
-          <MenuItem button onClick={handleCloseDrawer}>
-            キャンセル
-          </MenuItem>
-        </MenuList>
+        <MenuList menus={menus} />
       </Drawer>
       {newPostScreenVisible ? (
         <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
