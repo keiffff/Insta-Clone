@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, ComponentProps } from 'react';
 import styled from 'styled-components';
-import { Button, CircularProgress, IconButton, List, ListItem, SwipeableDrawer } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, SwipeableDrawer } from '@material-ui/core';
 import { ChevronLeft, Menu } from '@material-ui/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import {
@@ -10,6 +10,7 @@ import {
   useGetUsersInfoQuery,
   useGetFollowInfoQuery,
 } from '../types/hasura';
+import { MenuList } from '../components/MenuList';
 import { useAuth0 } from '../providers/Auth0';
 import { paths } from '../constants/paths';
 
@@ -190,6 +191,10 @@ export const ProfileShow = () => {
   const handleClickMoveToEdit = useCallback(() => history.push(`${paths.profile}/${userId}/edit`), [history, userId]);
   const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
   const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
+  const menus = useMemo<ComponentProps<typeof MenuList>['menus']>(
+    () => [{ label: 'ログアウト', onClick: handleClickLogout }],
+    [handleClickLogout],
+  );
 
   return (
     <>
@@ -260,11 +265,7 @@ export const ProfileShow = () => {
       </Content>
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
         <DrawerHandle />
-        <List>
-          <ListItem button onClick={handleClickLogout}>
-            ログアウト
-          </ListItem>
-        </List>
+        <MenuList menus={menus} />
       </SwipeableDrawer>
     </>
   );
