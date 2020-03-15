@@ -8,3 +8,5 @@ export const auth0Config = {
   clientId: 'bP59ly0s492a98yFzSMmbSG4RfyjO6wd',
   audience: 'insta-clone-sample-api',
 } as const;
+
+export const appUrl = 'https://insta-clone-sample.now.sh';

@@ -8,14 +8,7 @@ import {
   CardMedia as CardMediaOrigin,
   IconButton,
 } from '@material-ui/core';
-import {
-  ChatBubbleOutline,
-  FavoriteBorder,
-  FavoriteOutlined,
-  MoreHoriz,
-  Telegram,
-  TurnedInNot,
-} from '@material-ui/icons';
+import { ChatBubbleOutline, FavoriteBorder, FavoriteOutlined, MoreHoriz } from '@material-ui/icons';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { paths } from '../constants/paths';
@@ -83,10 +76,6 @@ const LikeIcon = styled(FavoriteOutlined)`
   color: #db183d;
 `;
 
-const SaveAsCollectionButtonWrapper = styled.div`
-  margin-left: auto;
-`;
-
 const CardContent = styled(CardContentOrigin)`
   &.MuiCardContent-root:last-child {
     padding: 8px;
@@ -127,15 +116,7 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
           <IconButton size="small">
             <ChatBubbleOutline />
           </IconButton>
-          <IconButton size="small">
-            <Telegram />
-          </IconButton>
         </FeedbackActions>
-        <SaveAsCollectionButtonWrapper>
-          <IconButton size="small">
-            <TurnedInNot />
-          </IconButton>
-        </SaveAsCollectionButtonWrapper>
       </CardActions>
       <CardContent>{caption}</CardContent>
     </Card>

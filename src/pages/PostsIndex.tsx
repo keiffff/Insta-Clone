@@ -8,6 +8,7 @@ import { PostItem } from '../components/PostItem';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { MenuList } from '../components/MenuList';
+import { ShareDialog } from '../components/ShareDialog';
 import {
   useNotifyNewPostsSubscription,
   useDeleteLikeMutation,
@@ -18,6 +19,7 @@ import {
 } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { paths } from '../constants/paths';
+import { appUrl } from '../constants/config';
 
 const Content = styled.section`
   padding: 48px 0px 56px;
@@ -82,12 +84,15 @@ export const PostsIndex = () => {
   const [uploadFile, { loading: uploadFileLoading }] = useUploadFileMutation();
   const [deletePost] = useDeletePostMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(-1);
   const [newPostScreenVisible, setNewPostScreenVisible] = useState(false);
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState('');
   const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
+  const handleOpenDialog = useCallback(() => setDialogOpen(true), []);
+  const handleCloseDialog = useCallback(() => setDialogOpen(false), []);
   const handleUploadFile = useCallback((fileArg: File) => {
     setFile(fileArg);
     setNewPostScreenVisible(true);
@@ -183,7 +188,7 @@ export const PostsIndex = () => {
           </Button>
         </LogoButtonWrapper>
         <ShareButtonWrapper>
-          <IconButton size="small">
+          <IconButton size="small" onClick={handleOpenDialog}>
             <Telegram />
           </IconButton>
         </ShareButtonWrapper>
@@ -213,6 +218,7 @@ export const PostsIndex = () => {
       <Drawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>
         <MenuList menus={menus} />
       </Drawer>
+      <ShareDialog open={dialogOpen} onClose={handleCloseDialog} sns={['twitter', 'facebook']} url={appUrl} />
       {newPostScreenVisible ? (
         <NewPostScreen imageUrl={previewUrl} onSubmit={handleSubmitNewPost} onClose={handleCloseNewPostScreen} />
       ) : null}
