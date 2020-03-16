@@ -4,7 +4,8 @@ import { CameraAltOutlined, Telegram } from '@material-ui/icons';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
-import { PostItem } from '../components/PostItem';
+import { PostsList } from '../components/PostsList';
+import { UsersList } from '../components/UsersList';
 import { Uploader } from '../components/Uploader';
 import { NewPostScreen } from '../components/NewPostScreen';
 import { MenuList } from '../components/MenuList';
@@ -14,6 +15,8 @@ import {
   useDeleteLikeMutation,
   useDeleteFollowMutation,
   useDeletePostMutation,
+  useGetUnfollowingUsersLazyQuery,
+  useInsertFollowMutation,
   useInsertLikeMutation,
   useInsertPostMutation,
 } from '../types/hasura';
@@ -61,13 +64,6 @@ const CircularProgressWrapper = styled.div`
   padding: 8px 0;
 `;
 
-const PostsList = styled.ul`
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`;
-
 const Drawer = styled(SwipeableDrawer)`
   .MuiPaper-root {
     background: transparent;
@@ -100,11 +96,19 @@ export const PostsIndex = () => {
     reader.readAsDataURL(fileArg);
     reader.onload = () => setPreviewUrl(reader.result as string);
   }, []);
+  const [
+    getUnfollowingUsers,
+    { loading: getUnfollowingUsersLoading, data: getUnfollowingUsersData },
+  ] = useGetUnfollowingUsersLazyQuery({
+    variables: { id: currentUser.sub },
+  });
   const { loading: notifyNewPostsLoading, data: notifyNewPostsData } = useNotifyNewPostsSubscription({
     variables: { userId: currentUser.sub },
+    onSubscriptionData: ({ subscriptionData }) => !subscriptionData.data?.posts.length && getUnfollowingUsers(),
   });
   const [insertLike] = useInsertLikeMutation();
   const [deleteLike] = useDeleteLikeMutation();
+  const [insertFollow] = useInsertFollowMutation();
   const [deleteFollow] = useDeleteFollowMutation();
   const [insertPost, { loading: insertPostLoading }] = useInsertPostMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -140,7 +144,7 @@ export const PostsIndex = () => {
     setNewPostScreenVisible(false);
   }, []);
   const handleClickLogo = useCallback(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), []);
-  const handleClickPostItem = useCallback<ComponentProps<typeof PostItem>['onClick']>(
+  const handleClickPostItem = useCallback<ComponentProps<typeof PostsList>['onClick']>(
     (action, postId) => {
       const likeOptions = {
         variables: { postId, userId: currentUser.sub },
@@ -161,6 +165,10 @@ export const PostsIndex = () => {
       }
     },
     [insertLike, deleteLike, currentUser],
+  );
+  const handleClickUserItem = useCallback<ComponentProps<typeof UsersList>['onClick']>(
+    userId => insertFollow({ variables: { followingId: currentUser.sub, followerId: userId } }),
+    [currentUser, insertFollow],
   );
   const menus = useMemo<ComponentProps<typeof MenuList>['menus']>(
     () => [
@@ -194,25 +202,14 @@ export const PostsIndex = () => {
         </ShareButtonWrapper>
       </Header>
       <Content>
-        {notifyNewPostsLoading || uploadFileLoading || insertPostLoading ? (
+        {notifyNewPostsLoading || uploadFileLoading || insertPostLoading || getUnfollowingUsersLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
+        ) : notifyNewPostsData?.posts.length ? (
+          <PostsList posts={notifyNewPostsData.posts} onClick={handleClickPostItem} />
         ) : (
-          <PostsList>
-            {notifyNewPostsData?.posts.map(({ id, caption, image, user, likes }) => (
-              <li key={id}>
-                <PostItem
-                  id={id}
-                  image={image}
-                  caption={caption}
-                  user={user}
-                  liked={likes.length > 0}
-                  onClick={handleClickPostItem}
-                />
-              </li>
-            )) || null}
-          </PostsList>
+          <UsersList users={getUnfollowingUsersData?.users ?? []} onClick={handleClickUserItem} />
         )}
       </Content>
       <Drawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>

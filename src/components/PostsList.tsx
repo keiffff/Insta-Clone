@@ -14,6 +14,11 @@ import { Link } from 'react-router-dom';
 import { paths } from '../constants/paths';
 
 type Props = {
+  posts: (Omit<Post, 'liked' | 'onClick'> & { likes: { id: number }[] })[];
+  onClick: Post['onClick'];
+};
+
+type Post = {
   id: number;
   image: string;
   caption: string;
@@ -82,7 +87,14 @@ const CardContent = styled(CardContentOrigin)`
   }
 `;
 
-export const PostItem = ({ id, image, caption, liked = false, user, onClick }: Props) => {
+const List = styled.ul`
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+const Item = ({ id, image, caption, liked = false, user, onClick }: Post) => {
   const [like, setLike] = useState(false);
   const handleClickLeader = useCallback(() => onClick('openMenu', id), [onClick, id]);
   const handleClickLike = useCallback(() => {
@@ -122,3 +134,13 @@ export const PostItem = ({ id, image, caption, liked = false, user, onClick }: P
     </Card>
   );
 };
+
+export const PostsList = ({ posts, onClick }: Props) => (
+  <List>
+    {posts.map(({ id, caption, image, user, likes }) => (
+      <li key={id}>
+        <Item id={id} image={image} caption={caption} user={user} liked={likes.length > 0} onClick={onClick} />
+      </li>
+    ))}
+  </List>
+);

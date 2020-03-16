@@ -36,3 +36,13 @@ export const GET_USERS_EDITABLE_INFO = gql`
     }
   }
 `;
+
+export const GET_UNFOLLOWING_USERS = gql`
+  query getUnfollowingUsers($id: String!) {
+    users(where: { followsByFollowingId: { _not: { following_id: { _eq: $id } } } }, limit: 20) {
+      id
+      avatar
+      name
+    }
+  }
+`;
