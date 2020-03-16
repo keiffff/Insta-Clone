@@ -36,14 +36,29 @@ const UserButtonWrapper = styled.div`
   margin-right: 12px;
 `;
 
-const UserIcon = styled.img`
+const AvatarWrapper = styled.div`
   width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid transparent;
+  position: relative;
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
 `;
 
-const UserIconSelected = styled(UserIcon)`
+const Avatar = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  object-fit: cover;
+`;
+
+const AvatarSelected = styled(Avatar)`
   border: 1px solid #262626;
 `;
 
@@ -70,11 +85,9 @@ export const PageFooter = ({ avatar, currentPath, onClickNavigation, onUploadFil
       <UserButtonWrapper>
         <IconButton size="small" onClick={handleClickUserButton}>
           {avatar ? (
-            currentPath.startsWith(paths.profile) ? (
-              <UserIconSelected src={avatar} />
-            ) : (
-              <UserIcon src={avatar} />
-            )
+            <AvatarWrapper>
+              {currentPath.startsWith(paths.profile) ? <AvatarSelected src={avatar} /> : <Avatar src={avatar} />}
+            </AvatarWrapper>
           ) : (
             <AccountCircle />
           )}

@@ -52,6 +52,10 @@ const MenuButtonWrapper = styled.div`
   margin-right: 12px;
 `;
 
+const Body = styled.div`
+  width: 100%;
+`;
+
 const UsersProfile = styled.div`
   padding: 12px;
   border-bottom: 1px solid #dbdbdb;
@@ -63,10 +67,25 @@ const AvatarAndSummaryRow = styled.div`
   margin-bottom: 16px;
 `;
 
-const Avatar = styled.img`
+const AvatarCell = styled.div`
   width: 25%;
-  height: 25%;
+  position: relative;
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+`;
+
+const Avatar = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  object-fit: cover;
 `;
 
 const Summary = styled.div`
@@ -217,10 +236,12 @@ export const ProfileShow = () => {
             <CircularProgress size={30} />
           </CircularProgressWrapper>
         ) : (
-          <div>
+          <Body>
             <UsersProfile>
               <AvatarAndSummaryRow>
-                <Avatar src={getUsersInfoData?.users[0].avatar} />
+                <AvatarCell>
+                  <Avatar src={getUsersInfoData?.users[0].avatar} />
+                </AvatarCell>
                 <Summary>
                   <Cell>
                     <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
@@ -260,7 +281,7 @@ export const ProfileShow = () => {
                 </PostImageWrapper>
               )) || null}
             </UsersPosts>
-          </div>
+          </Body>
         )}
       </Content>
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onOpen={handleOpenDrawer} onClose={handleCloseDrawer}>

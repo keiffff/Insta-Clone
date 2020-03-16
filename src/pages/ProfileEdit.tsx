@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef, ChangeEventHandler } from 'react';
-import { Button, CircularProgress, IconButton, Slide } from '@material-ui/core';
+import { Button, CircularProgress, Slide } from '@material-ui/core';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router-dom';
 import { useGetUsersEditableInfoQuery, useUpdateUserMutation } from '../types/hasura';
@@ -65,7 +65,7 @@ const UserInfo = styled.div`
 `;
 
 const EditAvatar = styled.div`
-  padding-bottom: 8px;
+  padding: 8px 0px;
   border-bottom: 1px solid #dbdbdb;
 `;
 
@@ -74,10 +74,25 @@ const AvatarWrapper = styled.div`
   justify-content: center;
 `;
 
+const AvatarCell = styled.div`
+  width: 25%;
+  position: relative;
+  height: auto;
+  &:before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+  }
+`;
+
 const Avatar = styled.img`
-  width: 104px;
-  height: 104px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  object-fit: cover;
 `;
 
 const EditAvatarButtonWrapper = styled.div`
@@ -188,9 +203,9 @@ export const ProfileEdit = () => {
             <>
               <EditAvatar>
                 <AvatarWrapper>
-                  <IconButton onClick={handleClickUploadButton} disabled={getUsersEditableInfoLoading}>
+                  <AvatarCell onClick={handleClickUploadButton}>
                     <Avatar src={attributes.avatar} />
-                  </IconButton>
+                  </AvatarCell>
                 </AvatarWrapper>
                 <EditAvatarButtonWrapper>
                   <Uploader ref={fileInputRef} onUpload={handleUploadFile}>
