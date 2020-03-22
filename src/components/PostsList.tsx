@@ -1,6 +1,7 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import {
   Avatar,
+  Button,
   Card as CardOrigin,
   CardActions,
   CardHeader as CardHeaderOrigin,
@@ -11,10 +12,11 @@ import {
 import { ChatBubbleOutline, FavoriteBorder, FavoriteOutlined, MoreHoriz } from '@material-ui/icons';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 import { paths } from '../constants/paths';
 
 type Props = {
-  posts: (Omit<Post, 'liked' | 'onClick'> & { likes: { id: number }[] })[];
+  posts: (Omit<Post, 'liked' | 'createdAt' | 'onClick'> & { likes: { id: number }[]; created_at: string })[];
   onClick: Post['onClick'];
 };
 
@@ -28,8 +30,16 @@ type Post = {
     avatar: string;
     name: string;
   };
+  createdAt: string;
   onClick: (action: 'openMenu' | 'like' | 'unlike', postId: number) => void;
 };
+
+const List = styled.ul`
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
 
 const Card = styled(CardOrigin)`
   &.MuiCard-root {
@@ -87,24 +97,63 @@ const CardContent = styled(CardContentOrigin)`
   }
 `;
 
-const List = styled.ul`
+const CaptionRow = styled.div`
   width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  display: flex;
 `;
 
-const Item = ({ id, image, caption, liked = false, user, onClick }: Post) => {
+const CaptionBase = styled.p`
+  display: inline-block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.8;
+`;
+
+const Caption = styled(CaptionBase)`
+  width: 70%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
+const CaptionExpanded = styled(CaptionBase)`
+  width: 100%;
+  word-wrap: break-word;
+`;
+
+const ReadMoreCell = styled.div`
+  width: 30%;
+  display: inline-block;
+`;
+
+const ReadMoreButton = styled(Button)`
+  .MuiButton-label {
+    color: #999999;
+  }
+`;
+
+const TimeStampLabel = styled.time`
+  font-size: 12px;
+  color: #999999;
+`;
+
+const Item = ({ id, image, caption, liked = false, user, createdAt, onClick }: Post) => {
+  const captionRef = useRef<HTMLParagraphElement>(null);
   const [like, setLike] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const handleClickLeader = useCallback(() => onClick('openMenu', id), [onClick, id]);
   const handleClickLike = useCallback(() => {
     setLike(v => !v);
     onClick(liked ? 'unlike' : 'like', id);
   }, [onClick, liked, id]);
+  const handleClickReadMore = useCallback(() => setExpanded(true), []);
+  const timestampLabel = useMemo(() => format(new Date(createdAt), 'yyyy年M月d日'), [createdAt]);
   useEffect(() => {
     setLike(liked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const ellipsisApplied = captionRef.current ? captionRef.current.offsetWidth < captionRef.current.scrollWidth : false;
 
   return (
     <Card>
@@ -130,16 +179,36 @@ const Item = ({ id, image, caption, liked = false, user, onClick }: Post) => {
           </IconButton>
         </FeedbackActions>
       </CardActions>
-      <CardContent>{caption}</CardContent>
+      <CardContent>
+        <CaptionRow>
+          {expanded ? <CaptionExpanded>{caption}</CaptionExpanded> : <Caption ref={captionRef}>{caption}</Caption>}
+          {ellipsisApplied && !expanded ? (
+            <ReadMoreCell>
+              <ReadMoreButton size="small" onClick={handleClickReadMore}>
+                続きを読む
+              </ReadMoreButton>
+            </ReadMoreCell>
+          ) : null}
+        </CaptionRow>
+        <TimeStampLabel>{timestampLabel}</TimeStampLabel>
+      </CardContent>
     </Card>
   );
 };
 
 export const PostsList = ({ posts, onClick }: Props) => (
   <List>
-    {posts.map(({ id, caption, image, user, likes }) => (
+    {posts.map(({ id, caption, image, user, likes, created_at: createdAt }) => (
       <li key={id}>
-        <Item id={id} image={image} caption={caption} user={user} liked={likes.length > 0} onClick={onClick} />
+        <Item
+          id={id}
+          image={image}
+          caption={caption}
+          user={user}
+          liked={likes.length > 0}
+          createdAt={createdAt}
+          onClick={onClick}
+        />
       </li>
     ))}
   </List>

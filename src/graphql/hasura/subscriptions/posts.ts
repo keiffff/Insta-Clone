@@ -12,6 +12,7 @@ export const NOTIFY_NEW_POSTS = gql`
       id
       image
       caption
+      created_at
       likes(where: { user_id: { _eq: $userId } }) {
         id
       }
@@ -19,6 +20,11 @@ export const NOTIFY_NEW_POSTS = gql`
         id
         avatar
         name
+      }
+      comments_aggregate {
+        aggregate {
+          count
+        }
       }
     }
   }
