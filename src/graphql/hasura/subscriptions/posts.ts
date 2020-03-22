@@ -21,10 +21,12 @@ export const NOTIFY_NEW_POSTS = gql`
         avatar
         name
       }
-      comments_aggregate {
-        aggregate {
-          count
+      comments {
+        id
+        user {
+          name
         }
+        comment
       }
     }
   }

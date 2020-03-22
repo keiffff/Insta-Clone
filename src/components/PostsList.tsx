@@ -15,8 +15,12 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { paths } from '../constants/paths';
 
+type Likes = { id: number }[];
+
+type Comments = { id: number; comment: string; user: { name: string } }[];
+
 type Props = {
-  posts: (Omit<Post, 'liked' | 'createdAt' | 'onClick'> & { likes: { id: number }[]; created_at: string })[];
+  posts: (Omit<Post, 'liked' | 'createdAt' | 'onClick'> & { likes: Likes; created_at: string })[];
   onClick: Post['onClick'];
 };
 
@@ -31,6 +35,7 @@ type Post = {
     name: string;
   };
   createdAt: string;
+  comments: Comments;
   onClick: (action: 'openMenu' | 'like' | 'unlike', postId: number) => void;
 };
 
@@ -138,7 +143,27 @@ const TimeStampLabel = styled.time`
   color: #999999;
 `;
 
-const Item = ({ id, image, caption, liked = false, user, createdAt, onClick }: Post) => {
+const CommentsRow = styled.div`
+  width: 100%;
+`;
+
+const Comment = styled.p`
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
+const CommentsLink = styled(Link)`
+  text-decoration: none;
+  font-size: 14px;
+  color: #999999;
+`;
+
+const Item = ({ id, image, caption, liked = false, user, createdAt, comments, onClick }: Post) => {
   const captionRef = useRef<HTMLParagraphElement>(null);
   const [like, setLike] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -181,7 +206,11 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, onClick }: P
       </CardActions>
       <CardContent>
         <CaptionRow>
-          {expanded ? <CaptionExpanded>{caption}</CaptionExpanded> : <Caption ref={captionRef}>{caption}</Caption>}
+          {expanded ? (
+            <CaptionExpanded>{caption}</CaptionExpanded>
+          ) : (
+            <Caption ref={captionRef}>{`${user.name} ${caption}`}</Caption>
+          )}
           {ellipsisApplied && !expanded ? (
             <ReadMoreCell>
               <ReadMoreButton size="small" onClick={handleClickReadMore}>
@@ -190,6 +219,12 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, onClick }: P
             </ReadMoreCell>
           ) : null}
         </CaptionRow>
+        <CommentsRow>
+          {comments.length > 0 ? <Comment>{`${comments[0].user.name} ${comments[0].comment}`}</Comment> : null}
+          {comments.length > 1 ? (
+            <CommentsLink to="#">{`コメント${comments.length}件すべてを表示`}</CommentsLink>
+          ) : null}
+        </CommentsRow>
         <TimeStampLabel>{timestampLabel}</TimeStampLabel>
       </CardContent>
     </Card>
@@ -198,7 +233,7 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, onClick }: P
 
 export const PostsList = ({ posts, onClick }: Props) => (
   <List>
-    {posts.map(({ id, caption, image, user, likes, created_at: createdAt }) => (
+    {posts.map(({ id, caption, image, user, likes, comments, created_at: createdAt }) => (
       <li key={id}>
         <Item
           id={id}
@@ -207,6 +242,7 @@ export const PostsList = ({ posts, onClick }: Props) => (
           user={user}
           liked={likes.length > 0}
           createdAt={createdAt}
+          comments={comments}
           onClick={onClick}
         />
       </li>
