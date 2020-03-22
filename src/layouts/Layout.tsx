@@ -53,7 +53,7 @@ export const Layout = ({ children }: Props) => {
           history.push(paths.home);
           break;
         case 'profile':
-          history.push(`${paths.profile}/${user.sub}`);
+          history.push(`/user/${user.sub}`);
           break;
         default:
           break;

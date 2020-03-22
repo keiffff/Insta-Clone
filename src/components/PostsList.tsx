@@ -13,7 +13,6 @@ import { ChatBubbleOutline, FavoriteBorder, FavoriteOutlined, MoreHoriz } from '
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { paths } from '../constants/paths';
 
 type Likes = { id: number }[];
 
@@ -36,7 +35,7 @@ type Post = {
   };
   createdAt: string;
   comments: Comments;
-  onClick: (action: 'openMenu' | 'like' | 'unlike', postId: number) => void;
+  onClick: (action: 'openMenu' | 'like' | 'unlike' | 'comment', postId: number) => void;
 };
 
 const List = styled.ul`
@@ -172,6 +171,7 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, comments, on
     setLike(v => !v);
     onClick(liked ? 'unlike' : 'like', id);
   }, [onClick, liked, id]);
+  const handleClickComment = useCallback(() => onClick('comment', id), [onClick, id]);
   const handleClickReadMore = useCallback(() => setExpanded(true), []);
   const timestampLabel = useMemo(() => format(new Date(createdAt), 'yyyy年M月d日'), [createdAt]);
   useEffect(() => {
@@ -189,7 +189,7 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, comments, on
             <MoreHoriz />
           </IconButton>
         }
-        title={<CardHeaderInnerLink to={`${paths.profile}/${user.id}`}>{user.name}</CardHeaderInnerLink>}
+        title={<CardHeaderInnerLink to={`/user/${user.id}`}>{user.name}</CardHeaderInnerLink>}
       />
       <CardMediaWrapper>
         <CardMedia image={image} />
@@ -199,7 +199,7 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, comments, on
           <IconButton size="small" onClick={handleClickLike}>
             {like ? <LikeIcon /> : <FavoriteBorder />}
           </IconButton>
-          <IconButton size="small">
+          <IconButton size="small" onClick={handleClickComment}>
             <ChatBubbleOutline />
           </IconButton>
         </FeedbackActions>
@@ -222,7 +222,7 @@ const Item = ({ id, image, caption, liked = false, user, createdAt, comments, on
         <CommentsRow>
           {comments.length > 0 ? <Comment>{`${comments[0].user.name} ${comments[0].comment}`}</Comment> : null}
           {comments.length > 1 ? (
-            <CommentsLink to="#">{`コメント${comments.length}件すべてを表示`}</CommentsLink>
+            <CommentsLink to={`/post/${id}/comments`}>{`コメント${comments.length}件すべてを表示`}</CommentsLink>
           ) : null}
         </CommentsRow>
         <TimeStampLabel>{timestampLabel}</TimeStampLabel>

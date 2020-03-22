@@ -160,11 +160,14 @@ export const PostsIndex = () => {
         case 'unlike':
           deleteLike(likeOptions);
           break;
+        case 'comment':
+          history.push(`/post/${postId}/comments`);
+          break;
         default:
           break;
       }
     },
-    [insertLike, deleteLike, currentUser],
+    [insertLike, deleteLike, currentUser, history],
   );
   const handleClickUserItem = useCallback<ComponentProps<typeof UsersList>['onClick']>(
     userId => insertFollow({ variables: { followingId: currentUser.sub, followerId: userId } }),

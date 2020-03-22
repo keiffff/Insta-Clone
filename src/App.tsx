@@ -5,6 +5,7 @@ import { ApolloProvider } from './providers/Apollo';
 import { auth0Config } from './constants/config';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PostsIndex } from './pages/PostsIndex';
+import { PostComments } from './pages/PostComments';
 import { ProfileEdit } from './pages/ProfileEdit';
 import { ProfileShow } from './pages/ProfileShow';
 import { Layout } from './layouts/Layout';
@@ -17,10 +18,13 @@ const AuthenticatedPages = () => (
         <Route path={paths.home} exact>
           <PostsIndex />
         </Route>
-        <Route path={`${paths.profile}/:id`} exact>
+        <Route path={paths.postComments}>
+          <PostComments />
+        </Route>
+        <Route path={paths.profileShow} exact>
           <ProfileShow />
         </Route>
-        <Route path={`${paths.profile}/:id/edit`}>
+        <Route path={paths.profileEdit}>
           <ProfileEdit />
         </Route>
       </Switch>

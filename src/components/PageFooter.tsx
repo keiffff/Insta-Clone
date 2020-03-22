@@ -86,7 +86,7 @@ export const PageFooter = ({ avatar, currentPath, onClickNavigation, onUploadFil
         <IconButton size="small" onClick={handleClickUserButton}>
           {avatar ? (
             <AvatarWrapper>
-              {currentPath.startsWith(paths.profile) ? <AvatarSelected src={avatar} /> : <Avatar src={avatar} />}
+              {currentPath.startsWith('/user') ? <AvatarSelected src={avatar} /> : <Avatar src={avatar} />}
             </AvatarWrapper>
           ) : (
             <AccountCircle />

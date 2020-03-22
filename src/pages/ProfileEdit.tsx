@@ -5,7 +5,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useGetUsersEditableInfoQuery, useUpdateUserMutation } from '../types/hasura';
 import { useUploadFileMutation } from '../types/fileUpload';
 import { Uploader } from '../components/Uploader';
-import { paths } from '../constants/paths';
 
 const Screen = styled.div`
   width: 100%;
@@ -155,7 +154,7 @@ export const ProfileEdit = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [attributes, setAttributes] = useState(initialAttributes);
-  const handleClickCancelButton = useCallback(() => history.replace(`${paths.profile}/${userId}`), [history, userId]);
+  const handleClickCancelButton = useCallback(() => history.replace(`/user/${userId}`), [history, userId]);
   const handleClickUploadButton = useCallback(() => fileInputRef.current?.click(), []);
   const handleUploadFile = useCallback((fileArg: File) => {
     setFile(fileArg);
@@ -178,7 +177,7 @@ export const ProfileEdit = () => {
       url = data?.uploadFile || '';
     }
     await updateUser({ variables: { id: userId, attributes: { ...attributes, ...(url ? { avatar: url } : {}) } } });
-    history.replace(`${paths.profile}/${userId}`);
+    history.replace(`/user/${userId}`);
   }, [updateUser, userId, attributes, history, file, uploadFile]);
   useEffect(() => {
     if (!getUsersEditableInfoData) return;

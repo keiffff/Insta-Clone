@@ -207,7 +207,7 @@ export const ProfileShow = () => {
   const handleOpenDrawer = useCallback(() => setDrawerOpen(true), []);
   const handleCloseDrawer = useCallback(() => setDrawerOpen(false), []);
   const handleClickLogout = useCallback(() => logout({ returnTo: window.location.origin }), [logout]);
-  const handleClickMoveToEdit = useCallback(() => history.push(`${paths.profile}/${userId}/edit`), [history, userId]);
+  const handleClickMoveToEdit = useCallback(() => history.push(`/user/${userId}/edit`), [history, userId]);
   const handleInsertFollow = useCallback(() => insertFollow(), [insertFollow]);
   const handleDeleteFollow = useCallback(() => deleteFollow(), [deleteFollow]);
   const menus = useMemo<ComponentProps<typeof MenuList>['menus']>(
