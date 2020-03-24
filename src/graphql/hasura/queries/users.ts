@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
-export const GET_USERS_INFO = gql`
-  query getUsersInfo($id: String!) {
+export const GET_PROFILE_INFO = gql`
+  query getProfileInfo($id: String!) {
     users(where: { id: { _eq: $id } }) {
       name
       avatar
@@ -15,6 +15,15 @@ export const GET_USERS_INFO = gql`
           count
         }
       }
+    }
+  }
+`;
+
+export const GET_USERS_INFO = gql`
+  query getUsersInfo($id: String!) {
+    users_by_pk(id: $id) {
+      name
+      avatar
     }
   }
 `;

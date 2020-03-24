@@ -7,7 +7,7 @@ import {
   GetFollowInfoDocument,
   useDeleteFollowMutation,
   useInsertFollowMutation,
-  useGetUsersInfoQuery,
+  useGetProfileInfoQuery,
   useGetFollowInfoQuery,
 } from '../types/hasura';
 import { MenuList } from '../components/MenuList';
@@ -180,7 +180,7 @@ export const ProfileShow = () => {
   const history = useHistory();
   const { id: userId } = useParams<{ id: string }>();
   const { user: currentUser, logout } = useAuth0();
-  const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
+  const { loading: getProfileInfoLoading, data: getProfileInfoData } = useGetProfileInfoQuery({
     variables: { id: userId },
     fetchPolicy: 'cache-and-network',
   });
@@ -223,7 +223,7 @@ export const ProfileShow = () => {
             <ChevronLeft />
           </IconButton>
         </BackButtonWrapper>
-        <UserNameLabel>{getUsersInfoData?.users[0].name ?? ''}</UserNameLabel>
+        <UserNameLabel>{getProfileInfoData?.users[0].name ?? ''}</UserNameLabel>
         <MenuButtonWrapper>
           <IconButton size="small" onClick={handleOpenDrawer}>
             <Menu />
@@ -231,7 +231,7 @@ export const ProfileShow = () => {
         </MenuButtonWrapper>
       </Header>
       <Content>
-        {getUsersInfoLoading || getFollowInfoLoading ? (
+        {getProfileInfoLoading || getFollowInfoLoading ? (
           <CircularProgressWrapper>
             <CircularProgress size={30} />
           </CircularProgressWrapper>
@@ -240,11 +240,11 @@ export const ProfileShow = () => {
             <UsersProfile>
               <AvatarAndSummaryRow>
                 <AvatarCell>
-                  <Avatar src={getUsersInfoData?.users[0].avatar} />
+                  <Avatar src={getProfileInfoData?.users[0].avatar} />
                 </AvatarCell>
                 <Summary>
                   <Cell>
-                    <CellValue>{getUsersInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
+                    <CellValue>{getProfileInfoData?.users[0].posts_aggregate.aggregate?.count ?? 0}</CellValue>
                     <CellLabel>投稿</CellLabel>
                   </Cell>
                   <Cell>
@@ -258,7 +258,7 @@ export const ProfileShow = () => {
                 </Summary>
               </AvatarAndSummaryRow>
               <DescriptionRow>
-                <Description>{getUsersInfoData?.users[0].description || ''}</Description>
+                <Description>{getProfileInfoData?.users[0].description || ''}</Description>
               </DescriptionRow>
               {viewingSelf ? (
                 <EditProfileButton variant="outlined" onClick={handleClickMoveToEdit}>
@@ -275,7 +275,7 @@ export const ProfileShow = () => {
               )}
             </UsersProfile>
             <UsersPosts>
-              {getUsersInfoData?.users[0].posts.map(({ id, image }) => (
+              {getProfileInfoData?.users[0].posts.map(({ id, image }) => (
                 <PostImageWrapper key={id}>
                   <PostImage src={image} />
                 </PostImageWrapper>
