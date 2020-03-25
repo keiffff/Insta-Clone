@@ -1,6 +1,6 @@
 import React, { useMemo, ComponentProps } from 'react';
 import styled from 'styled-components';
-import { CircularProgress, IconButton, Slide } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, Slide } from '@material-ui/core';
 import { ChevronLeft, Telegram } from '@material-ui/icons';
 import { useParams } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
@@ -113,6 +113,37 @@ const Avatar = styled.img`
   object-fit: cover;
 `;
 
+const TextFieldCell = styled.div`
+  width: 90%;
+  padding: 8px 8px 8px 0px;
+`;
+
+const TextFieldWrapper = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  border: 1px solid #dbdbdb;
+  border-radius: 999rem;
+  padding: 0px 8px;
+`;
+
+const TextField = styled.input`
+  display: flex;
+  flex-grow: 1;
+  font-size: 14px;
+  border: none;
+  outline: 0;
+  height: 14px;
+`;
+
+const SubmitButton = styled(Button)`
+  .MuiButton-label {
+    color: #3797f7;
+    font-weight: bold;
+  }
+`;
+
 const emojiItems = [
   { label: 'clapping-hands', value: '👏' },
   { label: 'thumbs-up', value: '👍' },
@@ -184,6 +215,12 @@ export const PostComments = () => {
                 <Avatar src={getUsersInfoData?.users_by_pk?.avatar} />
               </AvatarWrapper>
             </AvatarCell>
+            <TextFieldCell>
+              <TextFieldWrapper>
+                <TextField placeholder={`${currentUser.name}としてコメントを追加...`} />
+                <SubmitButton size="small">投稿する</SubmitButton>
+              </TextFieldWrapper>
+            </TextFieldCell>
           </AddCommentRow>
         </Footer>
       </Screen>
