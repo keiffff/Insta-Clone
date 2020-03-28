@@ -28,4 +28,3 @@ Hasuraで作ったInstagramのクローンアプリ
 - ユーザーはAuth0のログイン画面を通してサインイン/サインアップします。ここでアクセストークンを取得します。
 - ログイン済みユーザーはアプリケーション内の操作において、hasura-graphql-engineが提供するAPIを通してPostgreSQLに対して任意のCRUD操作を行います。
 - 画像アップロードはhasuraでは非対応であるため、別のGraphQLエンドポイントに対して実行します。Google Cloud Storageに画像をアップロードし、返却されたurlをhasuraの投稿データと紐付けています。
-| --- | --- |
