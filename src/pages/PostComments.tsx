@@ -1,11 +1,27 @@
-import React, { useMemo, ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  ComponentProps,
+  useState,
+  useRef,
+  ChangeEventHandler,
+  MouseEventHandler,
+} from 'react';
 import styled from 'styled-components';
 import { Button, CircularProgress, IconButton, Slide } from '@material-ui/core';
 import { ChevronLeft, Telegram } from '@material-ui/icons';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useAuth0 } from '../providers/Auth0';
 import { CommentsList } from '../components/CommentsList';
-import { useGetCommentsQuery, useGetUsersInfoQuery } from '../types/hasura';
+import { ShareDialog } from '../components/ShareDialog';
+import {
+  GetCommentsDocument,
+  useGetCommentsQuery,
+  useGetUsersInfoQuery,
+  useInsertCommentMutation,
+} from '../types/hasura';
+import { paths } from '../constants/paths';
+import { appUrl } from '../constants/config';
 
 const Screen = styled.div`
   width: 100%;
@@ -135,6 +151,8 @@ const TextField = styled.input`
   border: none;
   outline: 0;
   height: 14px;
+  line-height: 1.6;
+  padding: 4px;
 `;
 
 const SubmitButton = styled(Button)`
@@ -156,6 +174,7 @@ const emojiItems = [
 ];
 
 export const PostComments = () => {
+  const history = useHistory();
   const { id: postId } = useParams<{ id: string }>();
   const { user: currentUser } = useAuth0();
   const { loading: getCommentsLoading, data: getCommentsData } = useGetCommentsQuery({
@@ -164,6 +183,26 @@ export const PostComments = () => {
   const { loading: getUsersInfoLoading, data: getUsersInfoData } = useGetUsersInfoQuery({
     variables: { id: currentUser.sub },
   });
+  const textFieldRef = useRef<HTMLInputElement>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [insertComment] = useInsertCommentMutation({
+    variables: { userId: currentUser.sub, postId: Number(postId), comment: commentText },
+    refetchQueries: [{ query: GetCommentsDocument, variables: { postId: Number(postId) } }],
+  });
+  const handleOpenDialog = useCallback(() => setDialogOpen(true), []);
+  const handleCloseDialog = useCallback(() => setDialogOpen(false), []);
+  const handleClickEmojiButton = useCallback<MouseEventHandler<HTMLButtonElement>>(e => {
+    if (!textFieldRef.current?.selectionStart) return;
+    const { selectionStart } = textFieldRef.current;
+    setCommentText(t => t.slice(0, selectionStart) + e.currentTarget.dataset.emoji + t.slice(selectionStart));
+  }, []);
+  const handleChangeCommentText = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    e => setCommentText(e.currentTarget.value),
+    [],
+  );
+  const handleSubmit = useCallback(() => insertComment(), [insertComment]);
+  const handleClickBackButton = useCallback(() => history.replace(paths.home), [history]);
   const commentsWithPost = useMemo<ComponentProps<typeof CommentsList>['comments']>(() => {
     if (!getCommentsData) return [];
     const { posts_by_pk: post, comments } = getCommentsData;
@@ -175,55 +214,66 @@ export const PostComments = () => {
   }, [getCommentsData]);
 
   return (
-    <Slide mountOnEnter unmountOnExit in direction="right">
-      <Screen>
-        <Header>
-          <BackButtonWrapper>
-            <IconButton size="small">
-              <ChevronLeft />
-            </IconButton>
-          </BackButtonWrapper>
-          <Title>コメント</Title>
-          <ShareButtonWrapper>
-            <IconButton size="small">
-              <Telegram />
-            </IconButton>
-          </ShareButtonWrapper>
-        </Header>
-        <Content>
-          {getCommentsLoading || getUsersInfoLoading ? (
-            <CircularProgressWrapper>
-              <CircularProgress size={30} />
-            </CircularProgressWrapper>
-          ) : (
-            <CommentsList comments={commentsWithPost} />
-          )}
-        </Content>
-        <Footer>
-          <EmojiButtonsRow>
-            {emojiItems.map(({ label, value }) => (
-              <EmojiButton key={label} size="small">
-                <span role="img" aria-label={label}>
-                  {value}
-                </span>
-              </EmojiButton>
-            ))}
-          </EmojiButtonsRow>
-          <AddCommentRow>
-            <AvatarCell>
-              <AvatarWrapper>
-                <Avatar src={getUsersInfoData?.users_by_pk?.avatar} />
-              </AvatarWrapper>
-            </AvatarCell>
-            <TextFieldCell>
-              <TextFieldWrapper>
-                <TextField placeholder={`${currentUser.name}としてコメントを追加...`} />
-                <SubmitButton size="small">投稿する</SubmitButton>
-              </TextFieldWrapper>
-            </TextFieldCell>
-          </AddCommentRow>
-        </Footer>
-      </Screen>
-    </Slide>
+    <>
+      <Slide mountOnEnter unmountOnExit in direction="right">
+        <Screen>
+          <Header>
+            <BackButtonWrapper>
+              <IconButton size="small" onClick={handleClickBackButton}>
+                <ChevronLeft />
+              </IconButton>
+            </BackButtonWrapper>
+            <Title>コメント</Title>
+            <ShareButtonWrapper>
+              <IconButton size="small" onClick={handleOpenDialog}>
+                <Telegram />
+              </IconButton>
+            </ShareButtonWrapper>
+          </Header>
+          <Content>
+            {getCommentsLoading || getUsersInfoLoading ? (
+              <CircularProgressWrapper>
+                <CircularProgress size={30} />
+              </CircularProgressWrapper>
+            ) : (
+              <CommentsList comments={commentsWithPost} />
+            )}
+          </Content>
+          <Footer>
+            <EmojiButtonsRow>
+              {emojiItems.map(({ label, value }) => (
+                <EmojiButton key={label} size="small" onClick={handleClickEmojiButton} data-emoji={value}>
+                  <span role="img" aria-label={label}>
+                    {value}
+                  </span>
+                </EmojiButton>
+              ))}
+            </EmojiButtonsRow>
+            <AddCommentRow>
+              <AvatarCell>
+                <AvatarWrapper>
+                  <Avatar src={getUsersInfoData?.users_by_pk?.avatar} />
+                </AvatarWrapper>
+              </AvatarCell>
+              <TextFieldCell>
+                <TextFieldWrapper>
+                  <TextField
+                    type="text"
+                    value={commentText}
+                    placeholder={`${currentUser.name}としてコメントを追加...`}
+                    onChange={handleChangeCommentText}
+                    ref={textFieldRef}
+                  />
+                  <SubmitButton size="small" onClick={handleSubmit}>
+                    投稿する
+                  </SubmitButton>
+                </TextFieldWrapper>
+              </TextFieldCell>
+            </AddCommentRow>
+          </Footer>
+        </Screen>
+      </Slide>
+      <ShareDialog open={dialogOpen} onClose={handleCloseDialog} sns={['twitter', 'facebook']} url={appUrl} />
+    </>
   );
 };
