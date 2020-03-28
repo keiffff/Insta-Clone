@@ -1,5 +1,5 @@
 # Insta-Clone
-Hasuraで作ったInstagramのクローンアプリ
+Hasuraで作ったInstagramのクローンアプリ https://insta-clone-sample.now.sh/
 
 ## 機能
 
