@@ -46,6 +46,9 @@ const UserNameLabel = styled.span`
   display: inline-flex;
   margin: auto;
   font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const MenuButtonWrapper = styled.div`
